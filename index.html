@@ -1,0 +1,337 @@
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #fff; color: #111; padding: 24px 16px; }
+  h1 { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: #666; text-align: center; margin-bottom: 20px; }
+  .clear-btn { display: block; margin: 0 auto 20px; font-size: 14px; font-weight: 700; color: #fff; background: #2563eb; border: none; border-radius: 8px; padding: 10px 28px; cursor: pointer; }
+  .clear-btn:hover { background: #1d4ed8; }
+  .section { background: #fff; border: 2px solid #2563eb; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .section.green { border-color: #16a34a; }
+  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #2563eb; }
+  .section.green .section-title { border-bottom-color: #16a34a; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .input-group { display: flex; flex-direction: column; gap: 4px; }
+  .input-group label { font-size: 15px; font-weight: 600; }
+  .input-wrap { display: flex; align-items: center; }
+  .input-prefix, .input-suffix { font-size: 18px; font-weight: 700; background: #f0f4f8; border: 2px solid #2563eb; padding: 10px 8px; line-height: 1; white-space: nowrap; }
+  .input-prefix { border-right: none; border-radius: 8px 0 0 8px; }
+  .input-suffix { border-left: none; border-radius: 0 8px 8px 0; }
+  .input-field { font-size: 18px; font-weight: 700; color: #111; border: 2px solid #2563eb; padding: 10px 12px; outline: none; width: 100%; background: #fff; }
+  .input-field:focus { box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+  .input-field.has-prefix { border-radius: 0 8px 8px 0; }
+  .input-field.has-suffix { border-radius: 8px 0 0 8px; }
+  .input-field.has-both { border-radius: 0; }
+  .input-field.plain { border-radius: 8px; }
+  .quick-entry { margin-top: 16px; padding: 14px 16px; background: #f0f7ff; border-radius: 8px; border: 1px solid #bfdbfe; }
+  .quick-entry-label { font-size: 13px; font-weight: 600; color: #2563eb; margin-bottom: 8px; }
+  .or-divider { margin-top: 12px; font-size: 13px; color: #666; text-align: center; font-style: italic; }
+  .auto-note { font-size: 12px; color: #2563eb; font-weight: 600; padding: 12px 0; }
+  .base-metrics { margin-top: 16px; padding: 12px 16px; background: #f8fafc; border-radius: 8px; }
+  .base-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .base-row:last-child { margin-bottom: 0; }
+  .base-row .lbl { font-size: 15px; font-weight: 600; }
+  .base-row .val { font-size: 17px; font-weight: 700; }
+  .warn-box { margin-top: 10px; padding: 8px 10px; background: #fef2f2; border: 2px solid #dc2626; border-radius: 6px; font-size: 13px; font-weight: 700; color: #dc2626; }
+  .warn-box-small { margin-top: 6px; padding: 6px 10px; background: #fef2f2; border: 2px solid #dc2626; border-radius: 6px; font-size: 13px; font-weight: 700; color: #dc2626; display: none; }
+  .warn-box-small.visible { display: block; }
+  .warn-amber { margin-top: 12px; padding: 10px 14px; background: #fffbeb; border: 2px solid #f59e0b; border-radius: 8px; font-size: 14px; font-weight: 600; color: #92400e; display: none; }
+  .warn-amber.visible { display: block; }
+  .output-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+  .output-row.large { padding: 12px 0; }
+  .output-row .lbl { font-size: 15px; font-weight: 600; }
+  .output-row.large .lbl { font-size: 17px; }
+  .output-row .val { font-size: 17px; font-weight: 700; }
+  .output-row.large .val { font-size: 20px; }
+  .val.highlight { color: #2563eb; }
+  .val.warn { color: #dc2626; }
+  .remainder-box { margin-top: 8px; padding: 14px 16px; background: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; display: none; }
+  .remainder-box.visible { display: block; }
+  .remainder-box .title { font-size: 14px; font-weight: 700; color: #dc2626; margin-bottom: 2px; }
+  .remainder-box .amount { font-size: 22px; font-weight: 800; color: #dc2626; }
+  .cap-warn-inline { margin-top: 10px; padding: 6px 10px; background: #fef2f2; border-radius: 6px; font-size: 13px; font-weight: 600; color: #dc2626; display: none; }
+  .cap-warn-inline.visible { display: block; }
+  .spacer { height: 8px; }
+  .spacer-sm { height: 4px; }
+  .derived-price { margin-top: 8px; font-size: 14px; font-weight: 600; display: none; }
+  .derived-price.visible { display: block; }
+  .derived-price span { color: #2563eb; font-weight: 700; }
+</style>
+
+<h1>Concert Propel Pricing Calculator</h1>
+<div class="subtitle">SolarWorx — Financing Cap Optimizer</div>
+<button id="clearBtn" class="clear-btn">Clear All</button>
+
+<div class="section">
+  <div class="section-title">System Details</div>
+  <div class="grid2">
+    <div class="input-group">
+      <label>Solar System Size</label>
+      <div class="input-wrap">
+        <input id="solarKW" class="input-field has-suffix" type="text" inputmode="decimal" />
+        <span class="input-suffix">kW</span>
+      </div>
+    </div>
+    <div class="input-group">
+      <label>Battery Size</label>
+      <div class="input-wrap">
+        <input id="batteryKWh" class="input-field has-suffix" type="text" inputmode="decimal" />
+        <span class="input-suffix">kWh</span>
+      </div>
+    </div>
+  </div>
+  <div class="quick-entry">
+    <div class="quick-entry-label">Quick Entry — paste Aurora total and battery price</div>
+    <div class="grid2">
+      <div class="input-group">
+        <label>Total Base System Price</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input id="totalBasePrice" class="input-field has-prefix" type="text" inputmode="decimal" />
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Base Battery Price</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input id="batteryPrice" class="input-field has-prefix" type="text" inputmode="decimal" />
+        </div>
+      </div>
+    </div>
+    <div id="derivedPrice" class="derived-price">→ Base Solar Price: <span id="derivedPriceVal"></span></div>
+  </div>
+  <div class="or-divider">— or enter solar price directly —</div>
+  <div class="grid2" style="margin-top:12px">
+    <div class="input-group">
+      <label>Base Solar Price (manual)</label>
+      <div class="input-wrap">
+        <span class="input-prefix">$</span>
+        <input id="solarPrice" class="input-field has-prefix" type="text" inputmode="decimal" />
+      </div>
+    </div>
+    <div style="display:flex;align-items:end">
+      <div id="autoNote" class="auto-note" style="display:none">Auto-calculated from total</div>
+    </div>
+  </div>
+  <div id="baseMetrics" class="base-metrics" style="display:none">
+    <div class="base-row"><span class="lbl">Current Price/Watt:</span><span id="basePPW" class="val"></span></div>
+    <div class="base-row"><span class="lbl">Current Price/kWh:</span><span id="basePPKWh" class="val"></span></div>
+    <div id="baseExceedWarn" class="warn-box" style="display:none"></div>
+  </div>
+  <div id="propelBothWarn" class="warn-amber">⚠ Propel requires both solar and battery — enter both system sizes to continue.</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Price Caps</div>
+  <div class="grid2">
+    <div>
+      <div class="input-group">
+        <label>Solar Cap</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input id="capSolar" class="input-field has-both" type="text" inputmode="decimal" value="4.85" />
+          <span class="input-suffix">/W</span>
+        </div>
+      </div>
+      <div id="solarCapWarn" class="warn-box-small">⚠️ EXCEEDS PROPEL MAX ($4.85/W)</div>
+    </div>
+    <div>
+      <div class="input-group">
+        <label>Battery Cap</label>
+        <div class="input-wrap">
+          <span class="input-prefix">$</span>
+          <input id="capBattery" class="input-field has-both" type="text" inputmode="decimal" value="2000" />
+          <span class="input-suffix">/kWh</span>
+        </div>
+      </div>
+      <div id="batteryCapWarn" class="warn-box-small">⚠️ EXCEEDS PROPEL MAX ($2,000/kWh)</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Additional Work (Roofing, MPU, etc.)</div>
+  <div class="input-group">
+    <label>Additional Work Cost</label>
+    <div class="input-wrap">
+      <span class="input-prefix">$</span>
+      <input id="additionalWork" class="input-field has-prefix" type="text" inputmode="decimal" />
+    </div>
+  </div>
+</div>
+
+<div id="resultsSection" style="display:none">
+  <div class="section">
+    <div class="section-title">Results — After Additions</div>
+    <div class="output-row large"><span class="lbl">Total Financed Through Propel</span><span id="outPropelTotal" class="val highlight"></span></div>
+    <div id="remainderBox" class="remainder-box"><div class="title">Remainder — Cannot Be Financed Through Propel</div><div id="remainderAmt" class="amount"></div></div>
+    <div class="spacer"></div>
+    <div class="output-row large"><span class="lbl">Total System Cost</span><span id="outTotalCost" class="val"></span></div>
+    <div id="capWarnInline" class="cap-warn-inline"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">What to Enter in Propel</div>
+    <div class="output-row"><span class="lbl">New Solar Price (Put This In Propel Under Solar Cost)</span><span id="outNewSolar" class="val"></span></div>
+    <div class="output-row"><span class="lbl">New Battery Price (Put This In Propel Under Battery Cost)</span><span id="outNewBattery" class="val"></span></div>
+    <div class="spacer"></div>
+    <div class="output-row"><span class="lbl">New Price/Watt</span><span id="outPPW" class="val"></span></div>
+    <div class="output-row"><span class="lbl">New Price/kWh</span><span id="outPPKWh" class="val"></span></div>
+  </div>
+  <div id="addBreakdownSection" class="section" style="display:none">
+    <div class="section-title">Addition Breakdown</div>
+    <div class="output-row"><span class="lbl">Added to Solar</span><span id="outAddSolar" class="val"></span></div>
+    <div class="output-row"><span class="lbl">Added to Battery</span><span id="outAddBattery" class="val"></span></div>
+  </div>
+  <div id="headroomSection" class="section green" style="display:none">
+    <div class="section-title">Remaining Headroom Under Caps</div>
+    <div class="output-row"><span class="lbl">Solar — room to add</span><span id="outHrSolar" class="val"></span></div>
+    <div class="output-row"><span class="lbl">Battery — room to add</span><span id="outHrBattery" class="val"></span></div>
+    <div class="spacer-sm"></div>
+    <div class="output-row large"><span class="lbl">Total additional $ available under caps</span><span id="outHrTotal" class="val highlight"></span></div>
+  </div>
+</div>
+
+<div id="placeholder" style="text-align:center;padding:32px 16px;color:#999;font-size:16px;font-weight:500;">
+  Enter system size and pricing above to see results.
+</div>
+
+<script>
+(function() {
+  var HARD_CAP_SOLAR = 4.85;
+  var HARD_CAP_BATTERY = 2000;
+
+  function fmt(v) { return v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function fmtW(v) { return v.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}); }
+  function el(id) { return document.getElementById(id); }
+  function gv(id) { return el(id).value; }
+  function pf(id) { return parseFloat(gv(id)) || 0; }
+
+  function getEffectiveSolarPrice() {
+    var tbp = gv('totalBasePrice');
+    if (tbp !== '') return Math.max(0, (parseFloat(tbp)||0) - pf('batteryPrice'));
+    return pf('solarPrice');
+  }
+
+  function recalc() {
+    var sKW = pf('solarKW'), bKWh = pf('batteryKWh');
+    var tbp = gv('totalBasePrice');
+    var sPrice = getEffectiveSolarPrice(), bPrice = pf('batteryPrice');
+    var addl = pf('additionalWork');
+    var capS = pf('capSolar'), capB = pf('capBattery');
+
+    var showDerived = tbp !== '' && gv('batteryPrice') !== '';
+    el('derivedPrice').className = 'derived-price' + (showDerived ? ' visible' : '');
+    if (showDerived) el('derivedPriceVal').textContent = '$' + fmt(sPrice);
+
+    el('autoNote').style.display = tbp !== '' ? 'block' : 'none';
+
+    var solarFilled = sKW > 0, batteryFilled = bKWh > 0;
+    var onlyOne = (solarFilled && !batteryFilled) || (!solarFilled && batteryFilled);
+    el('propelBothWarn').className = 'warn-amber' + (onlyOne ? ' visible' : '');
+
+    el('solarCapWarn').className = 'warn-box-small' + (parseFloat(gv('capSolar')) > HARD_CAP_SOLAR ? ' visible' : '');
+    el('batteryCapWarn').className = 'warn-box-small' + (parseFloat(gv('capBattery')) > HARD_CAP_BATTERY ? ' visible' : '');
+
+    if (sKW <= 0 || bKWh <= 0) {
+      el('resultsSection').style.display = 'none';
+      el('baseMetrics').style.display = 'none';
+      el('placeholder').style.display = onlyOne ? 'none' : 'block';
+      return;
+    }
+
+    el('placeholder').style.display = 'none';
+    var sW = sKW * 1000;
+    var basePPW = sPrice / sW, basePPKWh = bPrice / bKWh;
+
+    el('baseMetrics').style.display = 'block';
+    el('basePPW').textContent = '$' + fmt(basePPW) + '/W';
+    el('basePPKWh').textContent = '$' + fmt(basePPKWh) + '/kWh';
+
+    var baseExS = basePPW > capS + 0.001, baseExB = basePPKWh > capB + 0.5;
+    var bew = el('baseExceedWarn');
+    if (baseExS || baseExB) {
+      var t = '';
+      if (baseExS) t += '<div>⚠️ Base solar price already exceeds the $' + capS + '/W cap</div>';
+      if (baseExB) t += '<div>⚠️ Base battery price already exceeds the $' + fmtW(capB) + '/kWh cap</div>';
+      bew.innerHTML = t;
+      bew.style.display = 'block';
+    } else { bew.style.display = 'none'; }
+
+    var sH = Math.max(0, capS * sW - sPrice), bH = Math.max(0, capB * bKWh - bPrice), tH = sH + bH;
+    var sA = 0, bA = 0, rem = 0;
+    if (addl > 0) {
+      if (tH <= 0) { rem = addl; }
+      else if (addl <= tH) { var r = sH / tH; sA = addl * r; bA = addl * (1 - r); }
+      else { sA = sH; bA = bH; rem = addl - tH; }
+    }
+
+    var nSP = sPrice + sA, nBP = bPrice + bA, nTC = nSP + nBP;
+    var nPPW = nSP / sW, nPPKWh = nBP / bKWh;
+    var solarAtCap = nPPW >= capS - 0.001, batteryAtCap = nPPKWh >= capB - 0.5;
+    var rSH = Math.max(0, capS * sW - nSP), rBH = Math.max(0, capB * bKWh - nBP), rTH = rSH + rBH;
+
+    el('resultsSection').style.display = 'block';
+    el('outPropelTotal').textContent = '$' + fmt(nTC);
+    el('outTotalCost').textContent = '$' + fmt(nTC + rem);
+
+    if (rem > 0) { el('remainderBox').className = 'remainder-box visible'; el('remainderAmt').textContent = '$' + fmt(rem); }
+    else { el('remainderBox').className = 'remainder-box'; }
+
+    var cwi = el('capWarnInline');
+    if (solarAtCap || batteryAtCap) {
+      var ct = '';
+      if (solarAtCap) ct += '<div>⚠ Solar has reached its price cap</div>';
+      if (batteryAtCap) ct += '<div>⚠ Battery has reached its price cap</div>';
+      cwi.innerHTML = ct; cwi.className = 'cap-warn-inline visible';
+    } else { cwi.className = 'cap-warn-inline'; }
+
+    el('outNewSolar').textContent = '$' + fmt(nSP);
+    el('outNewBattery').textContent = '$' + fmt(nBP);
+    el('outPPW').textContent = '$' + fmt(nPPW) + '/W';
+    el('outPPW').className = 'val' + (solarAtCap ? ' warn' : '');
+    el('outPPKWh').textContent = '$' + fmt(nPPKWh) + '/kWh';
+    el('outPPKWh').className = 'val' + (batteryAtCap ? ' warn' : '');
+
+    if (addl > 0) {
+      el('addBreakdownSection').style.display = 'block';
+      el('outAddSolar').textContent = '$' + fmt(sA);
+      el('outAddBattery').textContent = '$' + fmt(bA);
+    } else { el('addBreakdownSection').style.display = 'none'; }
+
+    if (rTH > 0.01) {
+      el('headroomSection').style.display = 'block';
+      el('outHrSolar').textContent = '$' + fmtW(rSH);
+      el('outHrSolar').className = 'val' + (rSH > 0 ? ' highlight' : '');
+      el('outHrBattery').textContent = '$' + fmtW(rBH);
+      el('outHrBattery').className = 'val' + (rBH > 0 ? ' highlight' : '');
+      el('outHrTotal').textContent = '$' + fmtW(rTH);
+    } else { el('headroomSection').style.display = 'none'; }
+  }
+
+  // Attach all event listeners after DOM is ready
+  var inputIds = ['solarKW', 'batteryKWh', 'totalBasePrice', 'batteryPrice', 'solarPrice', 'capSolar', 'capBattery', 'additionalWork'];
+
+  inputIds.forEach(function(id) {
+    el(id).addEventListener('input', function(e) {
+      var val = e.target.value;
+      if (val !== '' && !/^[0-9]*\.?[0-9]*$/.test(val)) {
+        e.target.value = val.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+        return;
+      }
+      if (id === 'totalBasePrice' && val !== '') {
+        el('solarPrice').value = '';
+      }
+      if (id === 'solarPrice' && val !== '') {
+        el('totalBasePrice').value = '';
+      }
+      recalc();
+    });
+  });
+
+  el('clearBtn').addEventListener('click', function() {
+    ['solarKW','batteryKWh','solarPrice','batteryPrice','totalBasePrice','additionalWork'].forEach(function(id) { el(id).value = ''; });
+    el('capSolar').value = '4.85';
+    el('capBattery').value = '2000';
+    recalc();
+  });
+})();
+</script>
