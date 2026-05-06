@@ -1,337 +1,487 @@
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #fff; color: #111; padding: 24px 16px; }
-  h1 { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 4px; }
-  .subtitle { font-size: 14px; color: #666; text-align: center; margin-bottom: 20px; }
-  .clear-btn { display: block; margin: 0 auto 20px; font-size: 14px; font-weight: 700; color: #fff; background: #2563eb; border: none; border-radius: 8px; padding: 10px 28px; cursor: pointer; }
-  .clear-btn:hover { background: #1d4ed8; }
-  .section { background: #fff; border: 2px solid #2563eb; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-  .section.green { border-color: #16a34a; }
-  .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #2563eb; }
-  .section.green .section-title { border-bottom-color: #16a34a; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .input-group { display: flex; flex-direction: column; gap: 4px; }
-  .input-group label { font-size: 15px; font-weight: 600; }
-  .input-wrap { display: flex; align-items: center; }
-  .input-prefix, .input-suffix { font-size: 18px; font-weight: 700; background: #f0f4f8; border: 2px solid #2563eb; padding: 10px 8px; line-height: 1; white-space: nowrap; }
-  .input-prefix { border-right: none; border-radius: 8px 0 0 8px; }
-  .input-suffix { border-left: none; border-radius: 0 8px 8px 0; }
-  .input-field { font-size: 18px; font-weight: 700; color: #111; border: 2px solid #2563eb; padding: 10px 12px; outline: none; width: 100%; background: #fff; }
-  .input-field:focus { box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
-  .input-field.has-prefix { border-radius: 0 8px 8px 0; }
-  .input-field.has-suffix { border-radius: 8px 0 0 8px; }
-  .input-field.has-both { border-radius: 0; }
-  .input-field.plain { border-radius: 8px; }
-  .quick-entry { margin-top: 16px; padding: 14px 16px; background: #f0f7ff; border-radius: 8px; border: 1px solid #bfdbfe; }
-  .quick-entry-label { font-size: 13px; font-weight: 600; color: #2563eb; margin-bottom: 8px; }
-  .or-divider { margin-top: 12px; font-size: 13px; color: #666; text-align: center; font-style: italic; }
-  .auto-note { font-size: 12px; color: #2563eb; font-weight: 600; padding: 12px 0; }
-  .base-metrics { margin-top: 16px; padding: 12px 16px; background: #f8fafc; border-radius: 8px; }
-  .base-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .base-row:last-child { margin-bottom: 0; }
-  .base-row .lbl { font-size: 15px; font-weight: 600; }
-  .base-row .val { font-size: 17px; font-weight: 700; }
-  .warn-box { margin-top: 10px; padding: 8px 10px; background: #fef2f2; border: 2px solid #dc2626; border-radius: 6px; font-size: 13px; font-weight: 700; color: #dc2626; }
-  .warn-box-small { margin-top: 6px; padding: 6px 10px; background: #fef2f2; border: 2px solid #dc2626; border-radius: 6px; font-size: 13px; font-weight: 700; color: #dc2626; display: none; }
-  .warn-box-small.visible { display: block; }
-  .warn-amber { margin-top: 12px; padding: 10px 14px; background: #fffbeb; border: 2px solid #f59e0b; border-radius: 8px; font-size: 14px; font-weight: 600; color: #92400e; display: none; }
-  .warn-amber.visible { display: block; }
-  .output-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
-  .output-row.large { padding: 12px 0; }
-  .output-row .lbl { font-size: 15px; font-weight: 600; }
-  .output-row.large .lbl { font-size: 17px; }
-  .output-row .val { font-size: 17px; font-weight: 700; }
-  .output-row.large .val { font-size: 20px; }
-  .val.highlight { color: #2563eb; }
-  .val.warn { color: #dc2626; }
-  .remainder-box { margin-top: 8px; padding: 14px 16px; background: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; display: none; }
-  .remainder-box.visible { display: block; }
-  .remainder-box .title { font-size: 14px; font-weight: 700; color: #dc2626; margin-bottom: 2px; }
-  .remainder-box .amount { font-size: 22px; font-weight: 800; color: #dc2626; }
-  .cap-warn-inline { margin-top: 10px; padding: 6px 10px; background: #fef2f2; border-radius: 6px; font-size: 13px; font-weight: 600; color: #dc2626; display: none; }
-  .cap-warn-inline.visible { display: block; }
-  .spacer { height: 8px; }
-  .spacer-sm { height: 4px; }
-  .derived-price { margin-top: 8px; font-size: 14px; font-weight: 600; display: none; }
-  .derived-price.visible { display: block; }
-  .derived-price span { color: #2563eb; font-weight: 700; }
-</style>
+import { useState, useCallback, useRef, useEffect } from "react";
 
-<h1>Concert Propel Pricing Calculator</h1>
-<div class="subtitle">SolarWorx — Financing Cap Optimizer</div>
-<button id="clearBtn" class="clear-btn">Clear All</button>
+/* ── HDM tier caps ── */
+const HDM_SOLAR_TIERS = [
+  { min: 0, max: 7, cap: 4.75, label: "0–7 kW" },
+  { min: 7.01, max: 15, cap: 4.50, label: "7.01–15 kW" },
+  { min: 15.01, max: 30, cap: 4.25, label: "15.01–30 kW" },
+  { min: 30.01, max: 50, cap: 4.00, label: "30.01–50 kW" },
+];
+const HDM_BATT_TIERS = [
+  { min: 0, max: 15, cap: 1800, label: "0–15 kWh" },
+  { min: 15.01, max: 30, cap: 1600, label: "15.01–30 kWh" },
+  { min: 30.01, max: 45, cap: 1200, label: "30.01–45 kWh" },
+  { min: 45.01, max: 60, cap: 1000, label: "45.01–60 kWh" },
+  { min: 60.01, max: 100, cap: 900, label: "60.01–100 kWh" },
+];
 
-<div class="section">
-  <div class="section-title">System Details</div>
-  <div class="grid2">
-    <div class="input-group">
-      <label>Solar System Size</label>
-      <div class="input-wrap">
-        <input id="solarKW" class="input-field has-suffix" type="text" inputmode="decimal" />
-        <span class="input-suffix">kW</span>
-      </div>
-    </div>
-    <div class="input-group">
-      <label>Battery Size</label>
-      <div class="input-wrap">
-        <input id="batteryKWh" class="input-field has-suffix" type="text" inputmode="decimal" />
-        <span class="input-suffix">kWh</span>
-      </div>
-    </div>
-  </div>
-  <div class="quick-entry">
-    <div class="quick-entry-label">Quick Entry — paste Aurora total and battery price</div>
-    <div class="grid2">
-      <div class="input-group">
-        <label>Total Base System Price</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input id="totalBasePrice" class="input-field has-prefix" type="text" inputmode="decimal" />
-        </div>
-      </div>
-      <div class="input-group">
-        <label>Base Battery Price</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input id="batteryPrice" class="input-field has-prefix" type="text" inputmode="decimal" />
-        </div>
-      </div>
-    </div>
-    <div id="derivedPrice" class="derived-price">→ Base Solar Price: <span id="derivedPriceVal"></span></div>
-  </div>
-  <div class="or-divider">— or enter solar price directly —</div>
-  <div class="grid2" style="margin-top:12px">
-    <div class="input-group">
-      <label>Base Solar Price (manual)</label>
-      <div class="input-wrap">
-        <span class="input-prefix">$</span>
-        <input id="solarPrice" class="input-field has-prefix" type="text" inputmode="decimal" />
-      </div>
-    </div>
-    <div style="display:flex;align-items:end">
-      <div id="autoNote" class="auto-note" style="display:none">Auto-calculated from total</div>
-    </div>
-  </div>
-  <div id="baseMetrics" class="base-metrics" style="display:none">
-    <div class="base-row"><span class="lbl">Current Price/Watt:</span><span id="basePPW" class="val"></span></div>
-    <div class="base-row"><span class="lbl">Current Price/kWh:</span><span id="basePPKWh" class="val"></span></div>
-    <div id="baseExceedWarn" class="warn-box" style="display:none"></div>
-  </div>
-  <div id="propelBothWarn" class="warn-amber">⚠ Propel requires both solar and battery — enter both system sizes to continue.</div>
-</div>
+const PROPEL_SOLAR_CAP = 4.85;
+const PROPEL_BATT_CAP = 2000;
 
-<div class="section">
-  <div class="section-title">Price Caps</div>
-  <div class="grid2">
-    <div>
-      <div class="input-group">
-        <label>Solar Cap</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input id="capSolar" class="input-field has-both" type="text" inputmode="decimal" value="4.85" />
-          <span class="input-suffix">/W</span>
-        </div>
-      </div>
-      <div id="solarCapWarn" class="warn-box-small">⚠️ EXCEEDS PROPEL MAX ($4.85/W)</div>
-    </div>
-    <div>
-      <div class="input-group">
-        <label>Battery Cap</label>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input id="capBattery" class="input-field has-both" type="text" inputmode="decimal" value="2000" />
-          <span class="input-suffix">/kWh</span>
-        </div>
-      </div>
-      <div id="batteryCapWarn" class="warn-box-small">⚠️ EXCEEDS PROPEL MAX ($2,000/kWh)</div>
-    </div>
-  </div>
-</div>
+function getHdmSolarCap(kw) {
+  const tier = HDM_SOLAR_TIERS.find((t) => kw >= t.min && kw <= t.max);
+  return tier ? tier.cap : HDM_SOLAR_TIERS[HDM_SOLAR_TIERS.length - 1].cap;
+}
+function getHdmBattCap(kwh) {
+  const tier = HDM_BATT_TIERS.find((t) => kwh >= t.min && kwh <= t.max);
+  return tier ? tier.cap : HDM_BATT_TIERS[HDM_BATT_TIERS.length - 1].cap;
+}
 
-<div class="section">
-  <div class="section-title">Additional Work (Roofing, MPU, etc.)</div>
-  <div class="input-group">
-    <label>Additional Work Cost</label>
-    <div class="input-wrap">
-      <span class="input-prefix">$</span>
-      <input id="additionalWork" class="input-field has-prefix" type="text" inputmode="decimal" />
-    </div>
-  </div>
-</div>
+/* ── Colors ── */
+const C = {
+  bg: "#ffffff",
+  card: "#f7f7f8",
+  border: "#dddde0",
+  text: "#1a1a1a",
+  textSec: "#5f5f6b",
+  textDim: "#8e8e99",
+  inputBg: "#ffffff",
+  inputBorder: "#ccccd0",
+  hdm: "#1a7a42",
+  hdmLight: "#e8f5ee",
+  hdmBorder: "#b8dcc8",
+  propel: "#1a5ab8",
+  propelLight: "#e8f0fc",
+  propelBorder: "#b0c8e8",
+  red: "#c0392b",
+  redBg: "#fdf0ee",
+  redBorder: "#f0c0b8",
+};
 
-<div id="resultsSection" style="display:none">
-  <div class="section">
-    <div class="section-title">Results — After Additions</div>
-    <div class="output-row large"><span class="lbl">Total Financed Through Propel</span><span id="outPropelTotal" class="val highlight"></span></div>
-    <div id="remainderBox" class="remainder-box"><div class="title">Remainder — Cannot Be Financed Through Propel</div><div id="remainderAmt" class="amount"></div></div>
-    <div class="spacer"></div>
-    <div class="output-row large"><span class="lbl">Total System Cost</span><span id="outTotalCost" class="val"></span></div>
-    <div id="capWarnInline" class="cap-warn-inline"></div>
-  </div>
-  <div class="section">
-    <div class="section-title">What to Enter in Propel</div>
-    <div class="output-row"><span class="lbl">New Solar Price (Put This In Propel Under Solar Cost)</span><span id="outNewSolar" class="val"></span></div>
-    <div class="output-row"><span class="lbl">New Battery Price (Put This In Propel Under Battery Cost)</span><span id="outNewBattery" class="val"></span></div>
-    <div class="spacer"></div>
-    <div class="output-row"><span class="lbl">New Price/Watt</span><span id="outPPW" class="val"></span></div>
-    <div class="output-row"><span class="lbl">New Price/kWh</span><span id="outPPKWh" class="val"></span></div>
-  </div>
-  <div id="addBreakdownSection" class="section" style="display:none">
-    <div class="section-title">Addition Breakdown</div>
-    <div class="output-row"><span class="lbl">Added to Solar</span><span id="outAddSolar" class="val"></span></div>
-    <div class="output-row"><span class="lbl">Added to Battery</span><span id="outAddBattery" class="val"></span></div>
-  </div>
-  <div id="headroomSection" class="section green" style="display:none">
-    <div class="section-title">Remaining Headroom Under Caps</div>
-    <div class="output-row"><span class="lbl">Solar — room to add</span><span id="outHrSolar" class="val"></span></div>
-    <div class="output-row"><span class="lbl">Battery — room to add</span><span id="outHrBattery" class="val"></span></div>
-    <div class="spacer-sm"></div>
-    <div class="output-row large"><span class="lbl">Total additional $ available under caps</span><span id="outHrTotal" class="val highlight"></span></div>
-  </div>
-</div>
+/* ── Controlled text input ── */
+function TextInput({ value, onChange, prefix = "$", suffix = "", placeholder = "0" }) {
+  const ref = useRef(null);
+  const [local, setLocal] = useState(value === 0 ? "" : String(value));
+  const prevValue = useRef(value);
 
-<div id="placeholder" style="text-align:center;padding:32px 16px;color:#999;font-size:16px;font-weight:500;">
-  Enter system size and pricing above to see results.
-</div>
-
-<script>
-(function() {
-  var HARD_CAP_SOLAR = 4.85;
-  var HARD_CAP_BATTERY = 2000;
-
-  function fmt(v) { return v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-  function fmtW(v) { return v.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}); }
-  function el(id) { return document.getElementById(id); }
-  function gv(id) { return el(id).value; }
-  function pf(id) { return parseFloat(gv(id)) || 0; }
-
-  function getEffectiveSolarPrice() {
-    var tbp = gv('totalBasePrice');
-    if (tbp !== '') return Math.max(0, (parseFloat(tbp)||0) - pf('batteryPrice'));
-    return pf('solarPrice');
-  }
-
-  function recalc() {
-    var sKW = pf('solarKW'), bKWh = pf('batteryKWh');
-    var tbp = gv('totalBasePrice');
-    var sPrice = getEffectiveSolarPrice(), bPrice = pf('batteryPrice');
-    var addl = pf('additionalWork');
-    var capS = pf('capSolar'), capB = pf('capBattery');
-
-    var showDerived = tbp !== '' && gv('batteryPrice') !== '';
-    el('derivedPrice').className = 'derived-price' + (showDerived ? ' visible' : '');
-    if (showDerived) el('derivedPriceVal').textContent = '$' + fmt(sPrice);
-
-    el('autoNote').style.display = tbp !== '' ? 'block' : 'none';
-
-    var solarFilled = sKW > 0, batteryFilled = bKWh > 0;
-    var onlyOne = (solarFilled && !batteryFilled) || (!solarFilled && batteryFilled);
-    el('propelBothWarn').className = 'warn-amber' + (onlyOne ? ' visible' : '');
-
-    el('solarCapWarn').className = 'warn-box-small' + (parseFloat(gv('capSolar')) > HARD_CAP_SOLAR ? ' visible' : '');
-    el('batteryCapWarn').className = 'warn-box-small' + (parseFloat(gv('capBattery')) > HARD_CAP_BATTERY ? ' visible' : '');
-
-    if (sKW <= 0 || bKWh <= 0) {
-      el('resultsSection').style.display = 'none';
-      el('baseMetrics').style.display = 'none';
-      el('placeholder').style.display = onlyOne ? 'none' : 'block';
-      return;
+  useEffect(() => {
+    if (prevValue.current !== value && document.activeElement !== ref.current) {
+      setLocal(value === 0 ? "" : String(value));
     }
+    prevValue.current = value;
+  }, [value]);
 
-    el('placeholder').style.display = 'none';
-    var sW = sKW * 1000;
-    var basePPW = sPrice / sW, basePPKWh = bPrice / bKWh;
+  const handleChange = (e) => {
+    const raw = e.target.value.replace(/[^0-9.]/g, "");
+    setLocal(raw);
+    const num = parseFloat(raw);
+    onChange(isNaN(num) ? 0 : num);
+  };
 
-    el('baseMetrics').style.display = 'block';
-    el('basePPW').textContent = '$' + fmt(basePPW) + '/W';
-    el('basePPKWh').textContent = '$' + fmt(basePPKWh) + '/kWh';
+  const handleBlur = () => {
+    const num = parseFloat(local);
+    if (isNaN(num) || num === 0) { setLocal(""); onChange(0); }
+    else { setLocal(String(num)); onChange(num); }
+  };
 
-    var baseExS = basePPW > capS + 0.001, baseExB = basePPKWh > capB + 0.5;
-    var bew = el('baseExceedWarn');
-    if (baseExS || baseExB) {
-      var t = '';
-      if (baseExS) t += '<div>⚠️ Base solar price already exceeds the $' + capS + '/W cap</div>';
-      if (baseExB) t += '<div>⚠️ Base battery price already exceeds the $' + fmtW(capB) + '/kWh cap</div>';
-      bew.innerHTML = t;
-      bew.style.display = 'block';
-    } else { bew.style.display = 'none'; }
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 6,
+      background: C.inputBg, border: `1.5px solid ${C.inputBorder}`, borderRadius: 6,
+      padding: "10px 14px",
+    }}>
+      {prefix && <span style={{ color: C.textDim, fontWeight: 600, fontSize: 16 }}>{prefix}</span>}
+      <input
+        ref={ref} type="text" inputMode="decimal" value={local}
+        onChange={handleChange} onBlur={handleBlur} placeholder={placeholder}
+        style={{
+          background: "none", border: "none", outline: "none",
+          color: C.text, width: "100%", fontSize: 17, fontWeight: 500,
+          fontFamily: "inherit",
+        }}
+      />
+      {suffix && <span style={{ color: C.textDim, fontSize: 14, whiteSpace: "nowrap", fontWeight: 500 }}>{suffix}</span>}
+    </div>
+  );
+}
 
-    var sH = Math.max(0, capS * sW - sPrice), bH = Math.max(0, capB * bKWh - bPrice), tH = sH + bH;
-    var sA = 0, bA = 0, rem = 0;
-    if (addl > 0) {
-      if (tH <= 0) { rem = addl; }
-      else if (addl <= tH) { var r = sH / tH; sA = addl * r; bA = addl * (1 - r); }
-      else { sA = sH; bA = bH; rem = addl - tH; }
-    }
+/* ── Adder row ── */
+function AdderRow({ adder, onUpdate, onRemove }) {
+  return (
+    <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+      <div style={{ flex: 2 }}>
+        <input
+          type="text" value={adder.name}
+          onChange={(e) => onUpdate({ ...adder, name: e.target.value })}
+          placeholder="Description"
+          style={{
+            background: C.inputBg, border: `1.5px solid ${C.inputBorder}`, borderRadius: 6,
+            padding: "10px 14px", color: C.text, width: "100%", fontSize: 15,
+            fontFamily: "inherit", outline: "none", boxSizing: "border-box",
+          }}
+        />
+      </div>
+      <div style={{ flex: 1 }}>
+        <TextInput value={adder.amount} onChange={(v) => onUpdate({ ...adder, amount: v })} />
+      </div>
+      <button onClick={onRemove} style={{
+        background: "none", border: "none", color: C.red, cursor: "pointer",
+        fontSize: 22, padding: "2px 8px", lineHeight: 1, fontWeight: 400,
+      }} title="Remove">×</button>
+    </div>
+  );
+}
 
-    var nSP = sPrice + sA, nBP = bPrice + bA, nTC = nSP + nBP;
-    var nPPW = nSP / sW, nPPKWh = nBP / bKWh;
-    var solarAtCap = nPPW >= capS - 0.001, batteryAtCap = nPPKWh >= capB - 0.5;
-    var rSH = Math.max(0, capS * sW - nSP), rBH = Math.max(0, capB * bKWh - nBP), rTH = rSH + rBH;
+/* ── Cap warning ── */
+function CapWarning({ label, actual, cap, unit = "/W" }) {
+  if (actual <= cap) return null;
+  return (
+    <div style={{
+      background: C.redBg, border: `1.5px solid ${C.redBorder}`, borderRadius: 6,
+      padding: "10px 14px", fontSize: 14, color: C.red, marginTop: 8,
+      display: "flex", alignItems: "center", gap: 8, fontWeight: 500,
+    }}>
+      <span style={{ fontSize: 18 }}>⚠</span>
+      <span><strong>{label}</strong> ${actual.toFixed(2)}{unit} exceeds cap of ${cap.toFixed(2)}{unit}</span>
+    </div>
+  );
+}
 
-    el('resultsSection').style.display = 'block';
-    el('outPropelTotal').textContent = '$' + fmt(nTC);
-    el('outTotalCost').textContent = '$' + fmt(nTC + rem);
+/* ── Result line ── */
+function ResultLine({ label, value, highlight = false, negative = false, large = false, dimmed = false, color = null }) {
+  const c = color || (highlight ? C.hdm : negative ? C.red : dimmed ? C.textDim : C.text);
+  return (
+    <div style={{
+      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+      padding: large ? "12px 0 4px" : "5px 0",
+      borderTop: large ? `2px solid ${C.border}` : "none",
+    }}>
+      <span style={{ color: dimmed ? C.textDim : C.textSec, fontSize: large ? 16 : 15 }}>{label}</span>
+      <span style={{
+        color: c, fontSize: large ? 24 : 17, fontWeight: large ? 700 : 500,
+      }}>
+        {negative && value > 0 ? "−" : ""}
+        {typeof value === "string" ? value : `$${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+      </span>
+    </div>
+  );
+}
 
-    if (rem > 0) { el('remainderBox').className = 'remainder-box visible'; el('remainderAmt').textContent = '$' + fmt(rem); }
-    else { el('remainderBox').className = 'remainder-box'; }
+/* ── Section header ── */
+function SectionHeader({ children, color = C.text }) {
+  return (
+    <div style={{
+      fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.5,
+      color, marginBottom: 12, marginTop: 8,
+    }}>{children}</div>
+  );
+}
 
-    var cwi = el('capWarnInline');
-    if (solarAtCap || batteryAtCap) {
-      var ct = '';
-      if (solarAtCap) ct += '<div>⚠ Solar has reached its price cap</div>';
-      if (batteryAtCap) ct += '<div>⚠ Battery has reached its price cap</div>';
-      cwi.innerHTML = ct; cwi.className = 'cap-warn-inline visible';
-    } else { cwi.className = 'cap-warn-inline'; }
+/* ── Field label ── */
+function Label({ children, sub = null }) {
+  return (
+    <div style={{ marginBottom: 5 }}>
+      <div style={{ fontSize: 14, color: C.textSec, fontWeight: 600 }}>{children}</div>
+      {sub && <div style={{ fontSize: 12, color: C.textDim }}>{sub}</div>}
+    </div>
+  );
+}
 
-    el('outNewSolar').textContent = '$' + fmt(nSP);
-    el('outNewBattery').textContent = '$' + fmt(nBP);
-    el('outPPW').textContent = '$' + fmt(nPPW) + '/W';
-    el('outPPW').className = 'val' + (solarAtCap ? ' warn' : '');
-    el('outPPKWh').textContent = '$' + fmt(nPPKWh) + '/kWh';
-    el('outPPKWh').className = 'val' + (batteryAtCap ? ' warn' : '');
+export default function App() {
+  const [hdm, setHdm] = useState({ solarKw: 0, solarCost: 0, battKwh: 0, battCost: 0, adders: [], rebate: 0 });
+  const [propel, setPropel] = useState({ solarKw: 0, solarCost: 0, battKwh: 0, battCost: 0, adders: [], rebate: 0 });
 
-    if (addl > 0) {
-      el('addBreakdownSection').style.display = 'block';
-      el('outAddSolar').textContent = '$' + fmt(sA);
-      el('outAddBattery').textContent = '$' + fmt(bA);
-    } else { el('addBreakdownSection').style.display = 'none'; }
+  const clearAll = useCallback(() => {
+    setHdm({ solarKw: 0, solarCost: 0, battKwh: 0, battCost: 0, adders: [], rebate: 0 });
+    setPropel({ solarKw: 0, solarCost: 0, battKwh: 0, battCost: 0, adders: [], rebate: 0 });
+  }, []);
 
-    if (rTH > 0.01) {
-      el('headroomSection').style.display = 'block';
-      el('outHrSolar').textContent = '$' + fmtW(rSH);
-      el('outHrSolar').className = 'val' + (rSH > 0 ? ' highlight' : '');
-      el('outHrBattery').textContent = '$' + fmtW(rBH);
-      el('outHrBattery').className = 'val' + (rBH > 0 ? ' highlight' : '');
-      el('outHrTotal').textContent = '$' + fmtW(rTH);
-    } else { el('headroomSection').style.display = 'none'; }
-  }
+  const updateHdm = useCallback((k, v) => setHdm((p) => ({ ...p, [k]: v })), []);
+  const updatePropel = useCallback((k, v) => setPropel((p) => ({ ...p, [k]: v })), []);
+  const addHdmAdder = useCallback(() => setHdm((p) => ({ ...p, adders: [...p.adders, { id: Date.now(), name: "", amount: 0 }] })), []);
+  const addPropelAdder = useCallback(() => setPropel((p) => ({ ...p, adders: [...p.adders, { id: Date.now(), name: "", amount: 0 }] })), []);
+  const updateHdmAdder = useCallback((id, u) => setHdm((p) => ({ ...p, adders: p.adders.map((a) => (a.id === id ? u : a)) })), []);
+  const removeHdmAdder = useCallback((id) => setHdm((p) => ({ ...p, adders: p.adders.filter((a) => a.id !== id) })), []);
+  const updatePropelAdder = useCallback((id, u) => setPropel((p) => ({ ...p, adders: p.adders.map((a) => (a.id === id ? u : a)) })), []);
+  const removePropelAdder = useCallback((id) => setPropel((p) => ({ ...p, adders: p.adders.filter((a) => a.id !== id) })), []);
 
-  // Attach all event listeners after DOM is ready
-  var inputIds = ['solarKW', 'batteryKWh', 'totalBasePrice', 'batteryPrice', 'solarPrice', 'capSolar', 'capBattery', 'additionalWork'];
+  /* ── HDM calc ── */
+  const hdmAdderTotal = hdm.adders.reduce((s, a) => s + (a.amount || 0), 0);
+  const hdmSolarCapPerW = hdm.solarKw > 0 ? getHdmSolarCap(hdm.solarKw) : 4.75;
+  const hdmBattCapPerKwh = hdm.battKwh > 0 ? getHdmBattCap(hdm.battKwh) : 1800;
+  const hdmMaxBattCost = hdm.battKwh * hdmBattCapPerKwh;
+  const hdmMaxSolarCost = hdm.solarKw * hdmSolarCapPerW * 1000;
+  const hdmBattHeadroom = Math.max(0, hdmMaxBattCost - hdm.battCost);
+  const hdmBattAdderAbsorbed = Math.min(hdmAdderTotal, hdmBattHeadroom);
+  const hdmAdderAfterBatt = hdmAdderTotal - hdmBattAdderAbsorbed;
+  const hdmSolarHeadroom = Math.max(0, hdmMaxSolarCost - hdm.solarCost);
+  const hdmSolarAdderAbsorbed = Math.min(hdmAdderAfterBatt, hdmSolarHeadroom);
+  const hdmAdderOverflow = hdmAdderAfterBatt - hdmSolarAdderAbsorbed;
+  const hdmFinalBatt = hdm.battCost + hdmBattAdderAbsorbed;
+  const hdmFinalSolar = hdm.solarCost + hdmSolarAdderAbsorbed;
+  const hdmFinalBattPerKwh = hdm.battKwh > 0 ? hdmFinalBatt / hdm.battKwh : 0;
+  const hdmFinalSolarPerW = hdm.solarKw > 0 ? hdmFinalSolar / (hdm.solarKw * 1000) : 0;
+  const hdmProject = hdmFinalSolar + hdmFinalBatt;
+  const hdmSolarDisc = hdmFinalSolar * 0.25;
+  const hdmBattDisc = hdmFinalBatt * 0.30;
+  const hdmTotalDisc = hdmSolarDisc + hdmBattDisc;
+  const hdmAfterDisc = hdmProject - hdmTotalDisc;
+  const hdmNet = hdmAfterDisc - (hdm.rebate || 0);
 
-  inputIds.forEach(function(id) {
-    el(id).addEventListener('input', function(e) {
-      var val = e.target.value;
-      if (val !== '' && !/^[0-9]*\.?[0-9]*$/.test(val)) {
-        e.target.value = val.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
-        return;
-      }
-      if (id === 'totalBasePrice' && val !== '') {
-        el('solarPrice').value = '';
-      }
-      if (id === 'solarPrice' && val !== '') {
-        el('totalBasePrice').value = '';
-      }
-      recalc();
-    });
+  /* ── Propel calc ── */
+  const propelAdderTotal = propel.adders.reduce((s, a) => s + (a.amount || 0), 0);
+  const propelMaxSolar = propel.solarKw * PROPEL_SOLAR_CAP * 1000;
+  const propelMaxBatt = propel.battKwh * PROPEL_BATT_CAP;
+  const propelSolarHR = Math.max(0, propelMaxSolar - propel.solarCost);
+  const propelBattHR = Math.max(0, propelMaxBatt - propel.battCost);
+  const propelTotalHR = propelSolarHR + propelBattHR;
+  let propelSolarAA = 0, propelBattAA = 0, propelOverflow = 0;
+  if (propelTotalHR > 0 && propelAdderTotal > 0) {
+    propelSolarAA = Math.min(propelAdderTotal * (propelSolarHR / propelTotalHR), propelSolarHR);
+    propelBattAA = Math.min(propelAdderTotal * (propelBattHR / propelTotalHR), propelBattHR);
+    propelOverflow = Math.max(0, propelAdderTotal - propelSolarAA - propelBattAA);
+  } else { propelOverflow = propelAdderTotal; }
+  const propelFinalSolar = propel.solarCost + propelSolarAA;
+  const propelFinalBatt = propel.battCost + propelBattAA;
+  const propelFinalSolarPerW = propel.solarKw > 0 ? propelFinalSolar / (propel.solarKw * 1000) : 0;
+  const propelFinalBattPerKwh = propel.battKwh > 0 ? propelFinalBatt / propel.battKwh : 0;
+  const propelProject = propelFinalSolar + propelFinalBatt;
+  const propelAF = 0.6588 * propelProject - 18 * propel.battKwh - 1296;
+  const propelTotalDisc = propelProject - propelAF;
+  const propelNet = propelAF - (propel.rebate || 0);
+
+  const diff = hdmNet - propelNet;
+  const inputGrid = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 };
+
+  const panelStyle = (accent, lightBg, borderC) => ({
+    flex: 1, minWidth: 360, background: C.bg, borderRadius: 8,
+    padding: "28px 24px", border: `2px solid ${borderC}`,
   });
 
-  el('clearBtn').addEventListener('click', function() {
-    ['solarKW','batteryKWh','solarPrice','batteryPrice','totalBasePrice','additionalWork'].forEach(function(id) { el(id).value = ''; });
-    el('capSolar').value = '4.85';
-    el('capBattery').value = '2000';
-    recalc();
-  });
-})();
-</script>
+  return (
+    <div style={{
+      minHeight: "100vh", background: "#f0f0f2", color: C.text,
+      fontFamily: "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
+      padding: "28px 20px",
+    }}>
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700, margin: 0, color: C.text, letterSpacing: -0.5 }}>
+          Prepaid TPO Comparison
+        </h1>
+        <p style={{ color: C.textDim, fontSize: 14, margin: "4px 0 0" }}>
+          HDM Capital vs. Concert Propel — SolarWorx
+        </p>
+      </div>
+
+      {/* Clear All */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
+        <button onClick={clearAll} style={{
+          background: C.bg, border: `1.5px solid ${C.border}`, borderRadius: 6,
+          color: C.red, padding: "8px 20px", fontSize: 14, cursor: "pointer",
+          fontWeight: 600,
+        }}>✕ Clear All</button>
+      </div>
+
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 24 }}>
+
+        {/* ═══ HDM ═══ */}
+        <div style={panelStyle(C.hdm, C.hdmLight, C.hdmBorder)}>
+          <div style={{ fontSize: 20, fontWeight: 700, color: C.hdm, marginBottom: 4 }}>HDM Capital</div>
+          <div style={{ fontSize: 13, color: C.textDim, marginBottom: 18 }}>
+            Solar: 25% discount · Battery: 30% discount · Rebates eligible
+          </div>
+
+          <div style={{
+            background: C.hdmLight, borderRadius: 6, padding: "10px 14px", marginBottom: 18,
+            border: `1px solid ${C.hdmBorder}`, fontSize: 13, color: C.textSec,
+          }}>
+            <span style={{ fontWeight: 700, color: C.hdm }}>Active Caps: </span>
+            Solar <strong>${hdmSolarCapPerW.toFixed(2)}/W</strong>
+            {hdm.solarKw > 0 && <span style={{ color: C.textDim }}> ({HDM_SOLAR_TIERS.find(t => hdm.solarKw >= t.min && hdm.solarKw <= t.max)?.label})</span>}
+            {" · "}Battery <strong>${hdmBattCapPerKwh.toLocaleString()}/kWh</strong>
+            {hdm.battKwh > 0 && <span style={{ color: C.textDim }}> ({HDM_BATT_TIERS.find(t => hdm.battKwh >= t.min && hdm.battKwh <= t.max)?.label})</span>}
+          </div>
+
+          <SectionHeader color={C.hdm}>System Inputs</SectionHeader>
+          <div style={inputGrid}>
+            <div><Label>Solar Size</Label><TextInput value={hdm.solarKw} onChange={(v) => updateHdm("solarKw", v)} suffix="kW" prefix="" /></div>
+            <div><Label>Solar Cost</Label><TextInput value={hdm.solarCost} onChange={(v) => updateHdm("solarCost", v)} /></div>
+          </div>
+          <div style={inputGrid}>
+            <div><Label>Battery Size</Label><TextInput value={hdm.battKwh} onChange={(v) => updateHdm("battKwh", v)} suffix="kWh" prefix="" /></div>
+            <div><Label>Battery Cost</Label><TextInput value={hdm.battCost} onChange={(v) => updateHdm("battCost", v)} /></div>
+          </div>
+
+          <SectionHeader color={C.hdm}>Adders</SectionHeader>
+          {hdm.adders.map((a) => (
+            <AdderRow key={a.id} adder={a} onUpdate={(u) => updateHdmAdder(a.id, u)} onRemove={() => removeHdmAdder(a.id)} />
+          ))}
+          <button onClick={addHdmAdder} style={{
+            background: "none", border: `1.5px dashed ${C.hdmBorder}`, borderRadius: 6,
+            color: C.hdm, padding: "8px 0", width: "100%", fontSize: 14,
+            cursor: "pointer", fontWeight: 600, marginBottom: 16,
+          }}>+ Add Line Item</button>
+
+          <SectionHeader color={C.hdm}>Rebates</SectionHeader>
+          <Label sub="SGIP, TECH Clean, utility rebates, etc.">Rebate Amount</Label>
+          <TextInput value={hdm.rebate} onChange={(v) => updateHdm("rebate", v)} />
+
+          {hdm.solarKw > 0 && hdmFinalSolarPerW > hdmSolarCapPerW && (
+            <CapWarning label="Solar" actual={hdmFinalSolarPerW} cap={hdmSolarCapPerW} unit="/W" />
+          )}
+          {hdm.battKwh > 0 && hdmFinalBattPerKwh > hdmBattCapPerKwh && (
+            <CapWarning label="Battery" actual={hdmFinalBattPerKwh} cap={hdmBattCapPerKwh} unit="/kWh" />
+          )}
+
+          <div style={{ marginTop: 24 }}>
+            <SectionHeader color={C.hdm}>Results — Enter in HDM</SectionHeader>
+            <div style={{ background: C.card, borderRadius: 6, padding: 18, border: `1px solid ${C.border}` }}>
+              <ResultLine label="Solar Cost (with adders)" value={hdmFinalSolar} />
+              <ResultLine label="  ↳ Effective $/W" value={hdm.solarKw > 0 ? `$${hdmFinalSolarPerW.toFixed(2)}/W` : "—"} dimmed />
+              <ResultLine label="Battery Cost (with adders)" value={hdmFinalBatt} />
+              <ResultLine label="  ↳ Effective $/kWh" value={hdm.battKwh > 0 ? `$${hdmFinalBattPerKwh.toFixed(0)}/kWh` : "—"} dimmed />
+              {hdmAdderOverflow > 0 && <ResultLine label="⚠ Adder overflow (unfunded)" value={hdmAdderOverflow} negative />}
+              <div style={{ height: 10 }} />
+              <ResultLine label="Project Cost" value={hdmProject} />
+              <ResultLine label="Solar Discount (25%)" value={hdmSolarDisc} negative />
+              <ResultLine label="Battery Discount (30%)" value={hdmBattDisc} negative />
+              <ResultLine label="Total Discount" value={hdmTotalDisc} negative />
+              <ResultLine label="After Discount" value={hdmAfterDisc} />
+              {hdm.rebate > 0 && <ResultLine label="Rebates" value={hdm.rebate} negative />}
+              <ResultLine label="Net System Price" value={hdmNet} large highlight color={C.hdm} />
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ PROPEL ═══ */}
+        <div style={panelStyle(C.propel, C.propelLight, C.propelBorder)}>
+          <div style={{ fontSize: 20, fontWeight: 700, color: C.propel, marginBottom: 4 }}>Concert Propel</div>
+          <div style={{ fontSize: 13, color: C.textDim, marginBottom: 18 }}>
+            f(S,B,kWh) = 0.6588(S+B) − 18·kWh − 1,296 · Rebates typically N/A
+          </div>
+
+          <div style={{
+            background: C.propelLight, borderRadius: 6, padding: "10px 14px", marginBottom: 18,
+            border: `1px solid ${C.propelBorder}`, fontSize: 13, color: C.textSec,
+          }}>
+            <span style={{ fontWeight: 700, color: C.propel }}>Caps: </span>
+            Solar <strong>${PROPEL_SOLAR_CAP.toFixed(2)}/W</strong>
+            {" · "}Battery <strong>${PROPEL_BATT_CAP.toLocaleString()}/kWh</strong>
+          </div>
+
+          <SectionHeader color={C.propel}>System Inputs</SectionHeader>
+          <div style={inputGrid}>
+            <div><Label>Solar Size</Label><TextInput value={propel.solarKw} onChange={(v) => updatePropel("solarKw", v)} suffix="kW" prefix="" /></div>
+            <div><Label>Solar Cost</Label><TextInput value={propel.solarCost} onChange={(v) => updatePropel("solarCost", v)} /></div>
+          </div>
+          <div style={inputGrid}>
+            <div><Label>Battery Size</Label><TextInput value={propel.battKwh} onChange={(v) => updatePropel("battKwh", v)} suffix="kWh" prefix="" /></div>
+            <div><Label>Battery Cost</Label><TextInput value={propel.battCost} onChange={(v) => updatePropel("battCost", v)} /></div>
+          </div>
+
+          <SectionHeader color={C.propel}>Adders</SectionHeader>
+          {propel.adders.map((a) => (
+            <AdderRow key={a.id} adder={a} onUpdate={(u) => updatePropelAdder(a.id, u)} onRemove={() => removePropelAdder(a.id)} />
+          ))}
+          <button onClick={addPropelAdder} style={{
+            background: "none", border: `1.5px dashed ${C.propelBorder}`, borderRadius: 6,
+            color: C.propel, padding: "8px 0", width: "100%", fontSize: 14,
+            cursor: "pointer", fontWeight: 600, marginBottom: 16,
+          }}>+ Add Line Item</button>
+
+          <SectionHeader color={C.propel}>Rebates</SectionHeader>
+          <Label sub="Propel typically does not allow rebates">Rebate Amount</Label>
+          <TextInput value={propel.rebate} onChange={(v) => updatePropel("rebate", v)} />
+
+          {propel.solarKw > 0 && propelFinalSolarPerW > PROPEL_SOLAR_CAP && (
+            <CapWarning label="Solar" actual={propelFinalSolarPerW} cap={PROPEL_SOLAR_CAP} unit="/W" />
+          )}
+          {propel.battKwh > 0 && propelFinalBattPerKwh > PROPEL_BATT_CAP && (
+            <CapWarning label="Battery" actual={propelFinalBattPerKwh} cap={PROPEL_BATT_CAP} unit="/kWh" />
+          )}
+
+          <div style={{ marginTop: 24 }}>
+            <SectionHeader color={C.propel}>Results — Enter in Propel</SectionHeader>
+            <div style={{ background: C.card, borderRadius: 6, padding: 18, border: `1px solid ${C.border}` }}>
+              <ResultLine label="Solar Cost (with adders)" value={propelFinalSolar} />
+              <ResultLine label="  ↳ Effective $/W" value={propel.solarKw > 0 ? `$${propelFinalSolarPerW.toFixed(2)}/W` : "—"} dimmed />
+              <ResultLine label="Battery Cost (with adders)" value={propelFinalBatt} />
+              <ResultLine label="  ↳ Effective $/kWh" value={propel.battKwh > 0 ? `$${propelFinalBattPerKwh.toFixed(0)}/kWh` : "—"} dimmed />
+              {propelOverflow > 0 && <ResultLine label="⚠ Adder overflow (unfunded)" value={propelOverflow} negative />}
+              <div style={{ height: 10 }} />
+              <ResultLine label="Project Cost (to Propel)" value={propelProject} />
+              <ResultLine label="Total Discount" value={propelTotalDisc} negative />
+              <ResultLine label="Amount Financed" value={Math.max(0, propelAF)} />
+              {propel.rebate > 0 && <ResultLine label="Rebates" value={propel.rebate} negative />}
+              <ResultLine label="Net System Price" value={propelNet} large highlight color={C.propel} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ COMPARISON ═══ */}
+      {(hdmProject > 0 || propelProject > 0) && (
+        <div style={{
+          background: C.bg, borderRadius: 8, padding: "24px 28px",
+          border: `2px solid ${C.border}`, marginBottom: 24,
+        }}>
+          <SectionHeader>Side-by-Side Comparison</SectionHeader>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 180px 1fr", gap: 0, fontSize: 15 }}>
+            <div style={{ textAlign: "right", paddingRight: 20 }}>
+              {[hdmProject, hdmTotalDisc,
+                hdmProject > 0 ? `${(hdmTotalDisc / hdmProject * 100).toFixed(1)}%` : "—",
+                hdmAfterDisc, hdm.rebate || 0, hdmNet,
+              ].map((v, i) => (
+                <div key={i} style={{
+                  padding: "8px 0", borderBottom: i < 5 ? `1px solid ${C.border}` : "none",
+                  color: i === 5 ? C.hdm : C.text,
+                  fontWeight: i === 5 ? 700 : 500, fontSize: i === 5 ? 22 : 16,
+                }}>
+                  {typeof v === "string" ? v : `$${Math.round(v).toLocaleString()}`}
+                </div>
+              ))}
+            </div>
+            <div style={{ textAlign: "center" }}>
+              {["Project Cost", "Total Discount", "Discount %", "After Discount", "Rebates", "Net Price"].map((l, i) => (
+                <div key={i} style={{
+                  padding: "8px 0", borderBottom: i < 5 ? `1px solid ${C.border}` : "none",
+                  color: C.textDim, fontSize: i === 5 ? 15 : 13, fontWeight: i === 5 ? 700 : 500,
+                }}>{l}</div>
+              ))}
+            </div>
+            <div style={{ textAlign: "left", paddingLeft: 20 }}>
+              {[propelProject, propelTotalDisc,
+                propelProject > 0 ? `${(propelTotalDisc / propelProject * 100).toFixed(1)}%` : "—",
+                Math.max(0, propelAF), propel.rebate || 0, propelNet,
+              ].map((v, i) => (
+                <div key={i} style={{
+                  padding: "8px 0", borderBottom: i < 5 ? `1px solid ${C.border}` : "none",
+                  color: i === 5 ? C.propel : C.text,
+                  fontWeight: i === 5 ? 700 : 500, fontSize: i === 5 ? 22 : 16,
+                }}>
+                  {typeof v === "string" ? v : `$${Math.round(v).toLocaleString()}`}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {hdmNet !== 0 && propelNet !== 0 && (
+            <div style={{
+              marginTop: 18, padding: "14px 20px", borderRadius: 6,
+              background: C.card, border: `1.5px solid ${C.border}`,
+              display: "flex", justifyContent: "center", alignItems: "center", gap: 14,
+            }}>
+              <span style={{ color: C.textSec, fontSize: 15, fontWeight: 500 }}>Difference:</span>
+              <span style={{ fontSize: 22, fontWeight: 700, color: diff > 0 ? C.propel : diff < 0 ? C.hdm : C.textDim }}>
+                ${Math.abs(Math.round(diff)).toLocaleString()}
+              </span>
+              <span style={{
+                fontSize: 13, padding: "4px 14px", borderRadius: 4, fontWeight: 700,
+                background: diff > 0 ? C.propelLight : diff < 0 ? C.hdmLight : C.card,
+                color: diff > 0 ? C.propel : diff < 0 ? C.hdm : C.textDim,
+                border: `1px solid ${diff > 0 ? C.propelBorder : diff < 0 ? C.hdmBorder : C.border}`,
+              }}>
+                {diff > 0 ? "Propel lower" : diff < 0 ? "HDM lower" : "Equal"}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div style={{ textAlign: "center", color: C.textDim, fontSize: 12, padding: "8px 0" }}>
+        HDM: 25% solar + 30% battery − rebates · Propel: 0.6588(S+B) − 18·kWh − 1,296 · SolarWorx Internal Tool
+      </div>
+    </div>
+  );
+}
