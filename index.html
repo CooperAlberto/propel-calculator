@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prepaid TPO Comparison — SolarWorx</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -13,12 +15,14 @@
   .header { text-align: center; margin-bottom: 24px; }
   .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
   .header p { color: #8e8e99; font-size: 14px; margin-top: 4px; }
-  .clear-row { display: flex; justify-content: flex-end; margin-bottom: 14px; }
-  .btn-clear {
+  .top-bar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 14px; }
+  .btn {
     background: #fff; border: 1.5px solid #dddde0; border-radius: 6px;
-    color: #c0392b; padding: 8px 20px; font-size: 14px; cursor: pointer; font-weight: 600;
+    padding: 8px 20px; font-size: 14px; cursor: pointer; font-weight: 600;
   }
-  .btn-clear:hover { background: #fdf0ee; }
+  .btn:hover { background: #f7f7f8; }
+  .btn-clear { color: #c0392b; }
+  .btn-download { color: #1a5ab8; }
   .columns { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
   .panel {
     flex: 1; min-width: 360px; background: #fff; border-radius: 8px;
@@ -32,15 +36,20 @@
   .panel-sub { font-size: 13px; color: #8e8e99; margin-bottom: 18px; }
   .cap-box {
     border-radius: 6px; padding: 10px 14px; margin-bottom: 18px;
-    font-size: 13px; color: #5f5f6b;
+    font-size: 13px; color: #5f5f6b; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
   }
   .cap-box.hdm { background: #e8f5ee; border: 1px solid #b8dcc8; }
   .cap-box.propel { background: #e8f0fc; border: 1px solid #b0c8e8; }
-  .cap-box strong { font-weight: 700; }
   .cap-label { font-weight: 700; }
   .cap-label.hdm { color: #1a7a42; }
   .cap-label.propel { color: #1a5ab8; }
   .cap-dim { color: #8e8e99; }
+  .cap-edit-input {
+    background: #fff; border: 1.5px solid #b0c8e8; border-radius: 4px;
+    padding: 3px 8px; font-size: 13px; font-weight: 700; width: 70px;
+    font-family: inherit; outline: none; color: #1a1a1a; text-align: center;
+  }
+  .cap-edit-input:focus { border-color: #1a5ab8; }
   .section-hdr {
     font-size: 13px; font-weight: 700; text-transform: uppercase;
     letter-spacing: 1.5px; margin-bottom: 12px; margin-top: 8px;
@@ -49,13 +58,15 @@
   .section-hdr.propel { color: #1a5ab8; }
   .section-hdr.neutral { color: #1a1a1a; }
   .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .input-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
   .field-label { font-size: 14px; color: #5f5f6b; font-weight: 600; margin-bottom: 5px; }
-  .field-sub { font-size: 12px; color: #8e8e99; }
+  .field-sub { font-size: 12px; color: #8e8e99; margin-bottom: 5px; }
   .input-wrap {
     display: flex; align-items: center; gap: 6px;
     background: #fff; border: 1.5px solid #ccccd0; border-radius: 6px; padding: 10px 14px;
   }
   .input-wrap:focus-within { border-color: #888; }
+  .input-wrap.derived { background: #f7f7f8; border-style: dashed; }
   .input-prefix { color: #8e8e99; font-weight: 600; font-size: 16px; }
   .input-suffix { color: #8e8e99; font-size: 14px; white-space: nowrap; font-weight: 500; }
   .input-field {
@@ -63,12 +74,8 @@
     width: 100%; font-size: 17px; font-weight: 500; font-family: inherit;
   }
   .input-field::placeholder { color: #ccccd0; }
+  .input-field.derived-text { color: #5f5f6b; }
   .adder-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-  .adder-row .desc-input {
-    flex: 2; background: #fff; border: 1.5px solid #ccccd0; border-radius: 6px;
-    padding: 10px 14px; color: #1a1a1a; font-size: 15px; font-family: inherit; outline: none;
-  }
-  .adder-row .desc-input:focus { border-color: #888; }
   .adder-row .amt-wrap { flex: 1; }
   .btn-remove {
     background: none; border: none; color: #c0392b; cursor: pointer;
@@ -107,12 +114,12 @@
     border: 2px solid #dddde0; margin-bottom: 24px;
   }
   .comp-grid { display: grid; grid-template-columns: 1fr 180px 1fr; font-size: 15px; }
-  .comp-cell { padding: 8px 0; border-bottom: 1px solid #dddde0; }
-  .comp-cell:last-child, .comp-cell.last { border-bottom: none; }
+  .comp-cell { padding: 8px 0; border-bottom: 1px solid #dddde0; font-weight: 500; font-size: 16px; }
+  .comp-cell.last { border-bottom: none; }
   .comp-cell.right { text-align: right; padding-right: 20px; }
-  .comp-cell.center { text-align: center; color: #8e8e99; font-size: 13px; font-weight: 500; }
+  .comp-cell.center { text-align: center; color: #8e8e99; font-size: 13px; }
   .comp-cell.left { text-align: left; padding-left: 20px; }
-  .comp-cell.bold { font-weight: 700; font-size: 22px; border-bottom: none; }
+  .comp-cell.bold { font-weight: 700; font-size: 22px; }
   .comp-cell.center.bold { font-size: 15px; font-weight: 700; }
   .delta-bar {
     margin-top: 18px; padding: 14px 20px; border-radius: 6px;
@@ -125,6 +132,12 @@
     font-size: 13px; padding: 4px 14px; border-radius: 4px; font-weight: 700;
   }
   .footer { text-align: center; color: #8e8e99; font-size: 12px; padding: 8px 0; }
+  @media print {
+    body { padding: 10px; background: #fff; }
+    .btn, .btn-add, .btn-remove, .top-bar { display: none !important; }
+    .panel, .comparison { break-inside: avoid; border-width: 1px; }
+    .input-wrap { border-color: #eee; }
+  }
 </style>
 </head>
 <body>
@@ -134,52 +147,48 @@
   <p>HDM Capital vs. Concert Propel — SolarWorx</p>
 </div>
 
-<div class="clear-row">
-  <button class="btn-clear" onclick="clearAll()">✕ Clear All</button>
+<div class="top-bar">
+  <button class="btn btn-download" onclick="downloadResults()">⬇ Download PDF</button>
+  <button class="btn btn-clear" onclick="clearAll()">✕ Clear All</button>
 </div>
 
 <div class="columns">
-  <!-- ═══ HDM PANEL ═══ -->
+  <!-- ═══ HDM ═══ -->
   <div class="panel panel-hdm">
     <div class="panel-title hdm">HDM Capital</div>
-    <div class="panel-sub">Solar: 25% discount · Battery: 30% discount · Rebates eligible</div>
+    <div class="panel-sub">Solar: 25% discount · Battery: 30% discount · Rebates eligible<br>Auto-weights cost to battery to maximize discount</div>
 
     <div class="cap-box hdm" id="hdm-caps">
       <span class="cap-label hdm">Active Caps: </span>
       Solar <strong>$4.75/W</strong> · Battery <strong>$1,800/kWh</strong>
     </div>
 
-    <div class="section-hdr hdm">System Inputs</div>
+    <div class="section-hdr hdm">System Sizing</div>
     <div class="input-grid">
       <div>
         <div class="field-label">Solar Size</div>
-        <div class="input-wrap">
-          <input class="input-field" id="hdm-solar-kw" inputmode="decimal" placeholder="0" oninput="calc()">
-          <span class="input-suffix">kW</span>
-        </div>
+        <div class="input-wrap"><input class="input-field" id="hdm-solar-kw" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('kw');calc()"><span class="input-suffix">kW</span></div>
+      </div>
+      <div>
+        <div class="field-label">Battery Size</div>
+        <div class="input-wrap"><input class="input-field" id="hdm-batt-kwh" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('kwh');calc()"><span class="input-suffix">kWh</span></div>
+      </div>
+    </div>
+
+    <div class="section-hdr hdm">Pricing</div>
+    <div class="field-sub">Fill any two — the third auto-calculates</div>
+    <div class="input-grid-3">
+      <div>
+        <div class="field-label">Total System Price</div>
+        <div class="input-wrap" id="hdm-total-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-total" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('total');calc()"></div>
       </div>
       <div>
         <div class="field-label">Solar Cost</div>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input class="input-field" id="hdm-solar-cost" inputmode="decimal" placeholder="0" oninput="calc()">
-        </div>
-      </div>
-    </div>
-    <div class="input-grid">
-      <div>
-        <div class="field-label">Battery Size</div>
-        <div class="input-wrap">
-          <input class="input-field" id="hdm-batt-kwh" inputmode="decimal" placeholder="0" oninput="calc()">
-          <span class="input-suffix">kWh</span>
-        </div>
+        <div class="input-wrap" id="hdm-solar-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-solar-cost" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('solar');calc()"></div>
       </div>
       <div>
         <div class="field-label">Battery Cost</div>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input class="input-field" id="hdm-batt-cost" inputmode="decimal" placeholder="0" oninput="calc()">
-        </div>
+        <div class="input-wrap" id="hdm-batt-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-batt-cost" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('batt');calc()"></div>
       </div>
     </div>
 
@@ -189,61 +198,54 @@
 
     <div class="section-hdr hdm">Rebates</div>
     <div class="field-label">Rebate Amount</div>
-    <div class="field-sub" style="margin-bottom:5px">SGIP, TECH Clean, utility rebates, etc.</div>
-    <div class="input-wrap">
-      <span class="input-prefix">$</span>
-      <input class="input-field" id="hdm-rebate" inputmode="decimal" placeholder="0" oninput="calc()">
-    </div>
+    <div class="field-sub">SGIP, TECH Clean, utility rebates, etc.</div>
+    <div class="input-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-rebate" inputmode="decimal" placeholder="0" oninput="calc()"></div>
 
     <div id="hdm-warnings" style="margin-top:4px"></div>
 
     <div class="results-box" style="margin-top:24px">
-      <div class="section-hdr hdm" style="margin-top:0">Results — Enter in HDM</div>
+      <div class="section-hdr hdm" style="margin-top:0">Results — What to Enter in HDM</div>
       <div id="hdm-results"></div>
     </div>
   </div>
 
-  <!-- ═══ PROPEL PANEL ═══ -->
+  <!-- ═══ PROPEL ═══ -->
   <div class="panel panel-propel">
     <div class="panel-title propel">Concert Propel</div>
     <div class="panel-sub">f(S,B,kWh) = 0.6588(S+B) − 18·kWh − 1,296 · Rebates typically N/A</div>
 
-    <div class="cap-box propel">
+    <div class="cap-box propel" id="propel-caps">
       <span class="cap-label propel">Caps: </span>
-      Solar <strong>$4.85/W</strong> · Battery <strong>$2,000/kWh</strong>
+      Solar <input class="cap-edit-input" id="propel-cap-solar" value="4.85" oninput="calc()">/W
+      · Battery <input class="cap-edit-input" id="propel-cap-batt" value="2000" style="width:60px" oninput="calc()">/kWh
     </div>
 
-    <div class="section-hdr propel">System Inputs</div>
+    <div class="section-hdr propel">System Sizing</div>
     <div class="input-grid">
       <div>
         <div class="field-label">Solar Size</div>
-        <div class="input-wrap">
-          <input class="input-field" id="propel-solar-kw" inputmode="decimal" placeholder="0" oninput="calc()">
-          <span class="input-suffix">kW</span>
-        </div>
+        <div class="input-wrap"><input class="input-field" id="propel-solar-kw" inputmode="decimal" placeholder="0" oninput="propelPriceSync('kw');calc()"><span class="input-suffix">kW</span></div>
+      </div>
+      <div>
+        <div class="field-label">Battery Size</div>
+        <div class="input-wrap"><input class="input-field" id="propel-batt-kwh" inputmode="decimal" placeholder="0" oninput="propelPriceSync('kwh');calc()"><span class="input-suffix">kWh</span></div>
+      </div>
+    </div>
+
+    <div class="section-hdr propel">Pricing</div>
+    <div class="field-sub">Fill any two — the third auto-calculates</div>
+    <div class="input-grid-3">
+      <div>
+        <div class="field-label">Total System Price</div>
+        <div class="input-wrap" id="propel-total-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-total" inputmode="decimal" placeholder="0" oninput="propelPriceSync('total');calc()"></div>
       </div>
       <div>
         <div class="field-label">Solar Cost</div>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input class="input-field" id="propel-solar-cost" inputmode="decimal" placeholder="0" oninput="calc()">
-        </div>
-      </div>
-    </div>
-    <div class="input-grid">
-      <div>
-        <div class="field-label">Battery Size</div>
-        <div class="input-wrap">
-          <input class="input-field" id="propel-batt-kwh" inputmode="decimal" placeholder="0" oninput="calc()">
-          <span class="input-suffix">kWh</span>
-        </div>
+        <div class="input-wrap" id="propel-solar-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-solar-cost" inputmode="decimal" placeholder="0" oninput="propelPriceSync('solar');calc()"></div>
       </div>
       <div>
         <div class="field-label">Battery Cost</div>
-        <div class="input-wrap">
-          <span class="input-prefix">$</span>
-          <input class="input-field" id="propel-batt-cost" inputmode="decimal" placeholder="0" oninput="calc()">
-        </div>
+        <div class="input-wrap" id="propel-batt-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-batt-cost" inputmode="decimal" placeholder="0" oninput="propelPriceSync('batt');calc()"></div>
       </div>
     </div>
 
@@ -253,16 +255,13 @@
 
     <div class="section-hdr propel">Rebates</div>
     <div class="field-label">Rebate Amount</div>
-    <div class="field-sub" style="margin-bottom:5px">Propel typically does not allow rebates</div>
-    <div class="input-wrap">
-      <span class="input-prefix">$</span>
-      <input class="input-field" id="propel-rebate" inputmode="decimal" placeholder="0" oninput="calc()">
-    </div>
+    <div class="field-sub">Propel typically does not allow rebates</div>
+    <div class="input-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-rebate" inputmode="decimal" placeholder="0" oninput="calc()"></div>
 
     <div id="propel-warnings" style="margin-top:4px"></div>
 
     <div class="results-box" style="margin-top:24px">
-      <div class="section-hdr propel" style="margin-top:0">Results — Enter in Propel</div>
+      <div class="section-hdr propel" style="margin-top:0">Results — What to Enter in Propel</div>
       <div id="propel-results"></div>
     </div>
   </div>
@@ -294,21 +293,15 @@ const HDM_BATT = [
   {min:60.01,max:100,cap:900,label:"60.01–100 kWh"},
 ];
 
-function hdmSolarCap(kw) {
-  const t = HDM_SOLAR.find(t => kw >= t.min && kw <= t.max);
-  return t || HDM_SOLAR[HDM_SOLAR.length - 1];
-}
-function hdmBattCap(kwh) {
-  const t = HDM_BATT.find(t => kwh >= t.min && kwh <= t.max);
-  return t || HDM_BATT[HDM_BATT.length - 1];
-}
+function hdmSolarTier(kw) { return HDM_SOLAR.find(t => kw >= t.min && kw <= t.max) || HDM_SOLAR[HDM_SOLAR.length-1]; }
+function hdmBattTier(kwh) { return HDM_BATT.find(t => kwh >= t.min && kwh <= t.max) || HDM_BATT[HDM_BATT.length-1]; }
 
 /* ── Adder state ── */
 let adders = { hdm: [], propel: [] };
 let adderIdCounter = 0;
 
 function addAdder(side) {
-  adders[side].push({ id: ++adderIdCounter, name: '', amount: 0 });
+  adders[side].push({ id: ++adderIdCounter, amount: 0 });
   renderAdders(side);
   calc();
 }
@@ -324,8 +317,6 @@ function renderAdders(side) {
     const row = document.createElement('div');
     row.className = 'adder-row';
     row.innerHTML = `
-      <input class="desc-input" type="text" placeholder="Description" value="${a.name}"
-        oninput="adders['${side}'].find(x=>x.id===${a.id}).name=this.value">
       <div class="amt-wrap">
         <div class="input-wrap">
           <span class="input-prefix">$</span>
@@ -343,44 +334,136 @@ function renderAdders(side) {
 function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
 function fmt(n) { return '$' + Math.round(Math.abs(n)).toLocaleString(); }
 
-function line(label, val, cls = '') {
+function line(label, val, cls) {
+  cls = cls || '';
   const isStr = typeof val === 'string';
-  return `<div class="result-line ${cls.includes('large') ? 'large' : ''}">
-    <span class="result-label ${cls.includes('dim') ? 'dim' : ''}">${label}</span>
-    <span class="result-val ${cls}">${isStr ? val : (cls.includes('neg') && val > 0 ? '−' : '') + fmt(val)}</span>
-  </div>`;
+  return '<div class="result-line ' + (cls.includes('large') ? 'large' : '') + '">' +
+    '<span class="result-label ' + (cls.includes('dim') ? 'dim' : '') + '">' + label + '</span>' +
+    '<span class="result-val ' + cls + '">' + (isStr ? val : ((cls.includes('neg') && val > 0 ? '−' : '') + fmt(val))) + '</span></div>';
+}
+
+/* ── Price sync: fill any 2 of 3, derive the third ── */
+let hdmLastEdited = []; // track which 2 fields user touched
+let propelLastEdited = [];
+
+function trackEdited(list, field) {
+  // Remove this field if already in list, push to end
+  const idx = list.indexOf(field);
+  if (idx !== -1) list.splice(idx, 1);
+  list.push(field);
+  // Keep only last 2
+  while (list.length > 2) list.shift();
+}
+
+function hdmPriceSync(source) {
+  trackEdited(hdmLastEdited, source);
+  const totalEl = document.getElementById('hdm-total');
+  const solarEl = document.getElementById('hdm-solar-cost');
+  const battEl = document.getElementById('hdm-batt-cost');
+  const totalW = document.getElementById('hdm-total-wrap');
+  const solarW = document.getElementById('hdm-solar-cost-wrap');
+  const battW = document.getElementById('hdm-batt-cost-wrap');
+
+  // Reset styling
+  [totalW, solarW, battW].forEach(w => w.classList.remove('derived'));
+  [totalEl, solarEl, battEl].forEach(el => el.classList.remove('derived-text'));
+
+  const has = hdmLastEdited.slice();
+  if (has.length < 2) return;
+
+  const derived = ['total','solar','batt'].find(f => !has.includes(f));
+  if (!derived) return;
+
+  const t = parseFloat(totalEl.value) || 0;
+  const s = parseFloat(solarEl.value) || 0;
+  const b = parseFloat(battEl.value) || 0;
+
+  if (derived === 'total' && s + b > 0) {
+    totalEl.value = (s + b) || '';
+    totalW.classList.add('derived');
+    totalEl.classList.add('derived-text');
+  } else if (derived === 'solar' && t >= b) {
+    solarEl.value = t - b > 0 ? (t - b) : '';
+    solarW.classList.add('derived');
+    solarEl.classList.add('derived-text');
+  } else if (derived === 'batt' && t >= s) {
+    battEl.value = t - s > 0 ? (t - s) : '';
+    battW.classList.add('derived');
+    battEl.classList.add('derived-text');
+  }
+}
+
+function propelPriceSync(source) {
+  trackEdited(propelLastEdited, source);
+  const totalEl = document.getElementById('propel-total');
+  const solarEl = document.getElementById('propel-solar-cost');
+  const battEl = document.getElementById('propel-batt-cost');
+  const totalW = document.getElementById('propel-total-wrap');
+  const solarW = document.getElementById('propel-solar-cost-wrap');
+  const battW = document.getElementById('propel-batt-cost-wrap');
+
+  [totalW, solarW, battW].forEach(w => w.classList.remove('derived'));
+  [totalEl, solarEl, battEl].forEach(el => el.classList.remove('derived-text'));
+
+  const has = propelLastEdited.slice();
+  if (has.length < 2) return;
+
+  const derived = ['total','solar','batt'].find(f => !has.includes(f));
+  if (!derived) return;
+
+  const t = parseFloat(totalEl.value) || 0;
+  const s = parseFloat(solarEl.value) || 0;
+  const b = parseFloat(battEl.value) || 0;
+
+  if (derived === 'total' && s + b > 0) {
+    totalEl.value = (s + b) || '';
+    totalW.classList.add('derived');
+    totalEl.classList.add('derived-text');
+  } else if (derived === 'solar' && t >= b) {
+    solarEl.value = t - b > 0 ? (t - b) : '';
+    solarW.classList.add('derived');
+    solarEl.classList.add('derived-text');
+  } else if (derived === 'batt' && t >= s) {
+    battEl.value = t - s > 0 ? (t - s) : '';
+    battW.classList.add('derived');
+    battEl.classList.add('derived-text');
+  }
 }
 
 /* ── Main calc ── */
 function calc() {
-  // HDM
+  // ═══ HDM ═══
   const hSolarKw = v('hdm-solar-kw');
-  const hSolarCost = v('hdm-solar-cost');
   const hBattKwh = v('hdm-batt-kwh');
+  const hSolarCost = v('hdm-solar-cost');
   const hBattCost = v('hdm-batt-cost');
   const hRebate = v('hdm-rebate');
   const hAdderTotal = adders.hdm.reduce((s, a) => s + (a.amount || 0), 0);
 
-  const hSolarTier = hdmSolarCap(hSolarKw);
-  const hBattTier = hdmBattCap(hBattKwh);
+  const hSolarT = hdmSolarTier(hSolarKw);
+  const hBattT = hdmBattTier(hBattKwh);
 
   // Update cap display
-  const capsHtml = `<span class="cap-label hdm">Active Caps: </span>
-    Solar <strong>$${hSolarTier.cap.toFixed(2)}/W</strong>${hSolarKw > 0 ? ` <span class="cap-dim">(${hSolarTier.label})</span>` : ''}
-    · Battery <strong>$${hBattTier.cap.toLocaleString()}/kWh</strong>${hBattKwh > 0 ? ` <span class="cap-dim">(${hBattTier.label})</span>` : ''}`;
-  document.getElementById('hdm-caps').innerHTML = capsHtml;
+  document.getElementById('hdm-caps').innerHTML =
+    '<span class="cap-label hdm">Active Caps: </span>' +
+    'Solar <strong>$' + hSolarT.cap.toFixed(2) + '/W</strong>' +
+    (hSolarKw > 0 ? ' <span class="cap-dim">(' + hSolarT.label + ')</span>' : '') +
+    ' · Battery <strong>$' + hBattT.cap.toLocaleString() + '/kWh</strong>' +
+    (hBattKwh > 0 ? ' <span class="cap-dim">(' + hBattT.label + ')</span>' : '');
 
-  const hMaxBatt = hBattKwh * hBattTier.cap;
-  const hMaxSolar = hSolarKw * hSolarTier.cap * 1000;
-  const hBattHR = Math.max(0, hMaxBatt - hBattCost);
-  const hBattAA = Math.min(hAdderTotal, hBattHR);
-  const hAfterBatt = hAdderTotal - hBattAA;
-  const hSolarHR = Math.max(0, hMaxSolar - hSolarCost);
-  const hSolarAA = Math.min(hAfterBatt, hSolarHR);
-  const hOverflow = hAfterBatt - hSolarAA;
+  // AUTO-WEIGHT: push as much as possible into battery first
+  const hTotalEquipment = hSolarCost + hBattCost + hAdderTotal;
+  const hMaxBatt = hBattKwh * hBattT.cap;
+  const hMaxSolar = hSolarKw * hSolarT.cap * 1000;
 
-  const hFinalBatt = hBattCost + hBattAA;
-  const hFinalSolar = hSolarCost + hSolarAA;
+  // Battery gets as much as possible up to cap
+  const hFinalBatt = Math.min(hTotalEquipment, hMaxBatt);
+  // Remainder goes to solar
+  const hRemainder = hTotalEquipment - hFinalBatt;
+  const hFinalSolar = Math.min(hRemainder, hMaxSolar);
+  // Any leftover is overflow
+  const hOverflow = hRemainder - hFinalSolar;
+
   const hFinalBattPer = hBattKwh > 0 ? hFinalBatt / hBattKwh : 0;
   const hFinalSolarPer = hSolarKw > 0 ? hFinalSolar / (hSolarKw * 1000) : 0;
   const hProject = hFinalSolar + hFinalBatt;
@@ -392,39 +475,39 @@ function calc() {
 
   // HDM warnings
   let hWarn = '';
-  if (hSolarKw > 0 && hFinalSolarPer > hSolarTier.cap)
-    hWarn += `<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>Solar</strong> $${hFinalSolarPer.toFixed(2)}/W exceeds cap of $${hSolarTier.cap.toFixed(2)}/W</span></div>`;
-  if (hBattKwh > 0 && hFinalBattPer > hBattTier.cap)
-    hWarn += `<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>Battery</strong> $${hFinalBattPer.toFixed(0)}/kWh exceeds cap of $${hBattTier.cap.toLocaleString()}/kWh</span></div>`;
+  if (hOverflow > 0)
+    hWarn += '<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>' + fmt(hOverflow) + '</strong> exceeds combined caps — cannot be financed</span></div>';
   document.getElementById('hdm-warnings').innerHTML = hWarn;
 
   // HDM results
   let hR = '';
-  hR += line('Solar Cost (with adders)', hFinalSolar);
-  hR += line('  ↳ Effective $/W', hSolarKw > 0 ? `$${hFinalSolarPer.toFixed(2)}/W` : '—', 'dim');
-  hR += line('Battery Cost (with adders)', hFinalBatt);
-  hR += line('  ↳ Effective $/kWh', hBattKwh > 0 ? `$${hFinalBattPer.toFixed(0)}/kWh` : '—', 'dim');
-  if (hOverflow > 0) hR += line('⚠ Adder overflow (unfunded)', hOverflow, 'neg');
+  hR += line('Battery Cost (optimized)', hFinalBatt);
+  hR += line('  ↳ Effective $/kWh', hBattKwh > 0 ? '$' + hFinalBattPer.toFixed(0) + '/kWh' : '—', 'dim');
+  hR += line('Solar Cost (remainder)', hFinalSolar);
+  hR += line('  ↳ Effective $/W', hSolarKw > 0 ? '$' + hFinalSolarPer.toFixed(2) + '/W' : '—', 'dim');
+  if (hOverflow > 0) hR += line('⚠ Overflow (unfunded)', hOverflow, 'neg');
   hR += '<div style="height:10px"></div>';
   hR += line('Project Cost', hProject);
-  hR += line('Solar Discount (25%)', hSolarDisc, 'neg');
   hR += line('Battery Discount (30%)', hBattDisc, 'neg');
+  hR += line('Solar Discount (25%)', hSolarDisc, 'neg');
   hR += line('Total Discount', hTotalDisc, 'neg');
   hR += line('After Discount', hAfterDisc);
   if (hRebate > 0) hR += line('Rebates', hRebate, 'neg');
   hR += line('Net System Price', hNet, 'large hdm');
   document.getElementById('hdm-results').innerHTML = hR;
 
-  // PROPEL
+  // ═══ PROPEL ═══
   const pSolarKw = v('propel-solar-kw');
-  const pSolarCost = v('propel-solar-cost');
   const pBattKwh = v('propel-batt-kwh');
+  const pSolarCost = v('propel-solar-cost');
   const pBattCost = v('propel-batt-cost');
   const pRebate = v('propel-rebate');
   const pAdderTotal = adders.propel.reduce((s, a) => s + (a.amount || 0), 0);
+  const pCapSolar = parseFloat(document.getElementById('propel-cap-solar').value) || 4.85;
+  const pCapBatt = parseFloat(document.getElementById('propel-cap-batt').value) || 2000;
 
-  const pMaxSolar = pSolarKw * 4.85 * 1000;
-  const pMaxBatt = pBattKwh * 2000;
+  const pMaxSolar = pSolarKw * pCapSolar * 1000;
+  const pMaxBatt = pBattKwh * pCapBatt;
   const pSolarHR = Math.max(0, pMaxSolar - pSolarCost);
   const pBattHR = Math.max(0, pMaxBatt - pBattCost);
   const pTotalHR = pSolarHR + pBattHR;
@@ -446,18 +529,18 @@ function calc() {
 
   // Propel warnings
   let pWarn = '';
-  if (pSolarKw > 0 && pFinalSolarPer > 4.85)
-    pWarn += `<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>Solar</strong> $${pFinalSolarPer.toFixed(2)}/W exceeds cap of $4.85/W</span></div>`;
-  if (pBattKwh > 0 && pFinalBattPer > 2000)
-    pWarn += `<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>Battery</strong> $${pFinalBattPer.toFixed(0)}/kWh exceeds cap of $2,000/kWh</span></div>`;
+  if (pSolarKw > 0 && pFinalSolarPer > pCapSolar)
+    pWarn += '<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>Solar</strong> $' + pFinalSolarPer.toFixed(2) + '/W exceeds cap of $' + pCapSolar.toFixed(2) + '/W</span></div>';
+  if (pBattKwh > 0 && pFinalBattPer > pCapBatt)
+    pWarn += '<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>Battery</strong> $' + pFinalBattPer.toFixed(0) + '/kWh exceeds cap of $' + pCapBatt.toLocaleString() + '/kWh</span></div>';
   document.getElementById('propel-warnings').innerHTML = pWarn;
 
   // Propel results
   let pR = '';
   pR += line('Solar Cost (with adders)', pFinalSolar);
-  pR += line('  ↳ Effective $/W', pSolarKw > 0 ? `$${pFinalSolarPer.toFixed(2)}/W` : '—', 'dim');
+  pR += line('  ↳ Effective $/W', pSolarKw > 0 ? '$' + pFinalSolarPer.toFixed(2) + '/W' : '—', 'dim');
   pR += line('Battery Cost (with adders)', pFinalBatt);
-  pR += line('  ↳ Effective $/kWh', pBattKwh > 0 ? `$${pFinalBattPer.toFixed(0)}/kWh` : '—', 'dim');
+  pR += line('  ↳ Effective $/kWh', pBattKwh > 0 ? '$' + pFinalBattPer.toFixed(0) + '/kWh' : '—', 'dim');
   if (pOverflow > 0) pR += line('⚠ Adder overflow (unfunded)', pOverflow, 'neg');
   pR += '<div style="height:10px"></div>';
   pR += line('Project Cost (to Propel)', pProject);
@@ -467,7 +550,7 @@ function calc() {
   pR += line('Net System Price', pNet, 'large propel');
   document.getElementById('propel-results').innerHTML = pR;
 
-  // COMPARISON
+  // ═══ COMPARISON ═══
   const showComp = hProject > 0 || pProject > 0;
   document.getElementById('comparison').style.display = showComp ? 'block' : 'none';
   if (!showComp) return;
@@ -485,17 +568,16 @@ function calc() {
   ];
 
   let grid = '';
-  rows.forEach((r, i) => {
+  rows.forEach(function(r) {
     const isLast = r[3];
-    const border = isLast ? 'last' : '';
-    const bold = isLast ? 'bold' : '';
-    const hColor = isLast ? 'color:#1a7a42' : '';
-    const pColor = isLast ? 'color:#1a5ab8' : '';
+    const cls = isLast ? 'last bold' : '';
+    const hStyle = isLast ? 'color:#1a7a42' : '';
+    const pStyle = isLast ? 'color:#1a5ab8' : '';
     const hVal = typeof r[1] === 'string' ? r[1] : fmt(r[1]);
     const pVal = typeof r[2] === 'string' ? r[2] : fmt(r[2]);
-    grid += `<div class="comp-cell right ${border} ${bold}" style="${hColor}">${hVal}</div>`;
-    grid += `<div class="comp-cell center ${border} ${bold}">${r[0]}</div>`;
-    grid += `<div class="comp-cell left ${border} ${bold}" style="${pColor}">${pVal}</div>`;
+    grid += '<div class="comp-cell right ' + cls + '" style="' + hStyle + '">' + hVal + '</div>';
+    grid += '<div class="comp-cell center ' + cls + '">' + r[0] + '</div>';
+    grid += '<div class="comp-cell left ' + cls + '" style="' + pStyle + '">' + pVal + '</div>';
   });
   document.getElementById('comp-grid').innerHTML = grid;
 
@@ -508,22 +590,141 @@ function calc() {
     const badgeBg = diff > 0 ? '#e8f0fc' : diff < 0 ? '#e8f5ee' : '#f7f7f8';
     const badgeBorder = diff > 0 ? '#b0c8e8' : diff < 0 ? '#b8dcc8' : '#dddde0';
     const badgeText = diff > 0 ? 'Propel lower' : diff < 0 ? 'HDM lower' : 'Equal';
-    deltaBar.innerHTML = `
-      <span class="delta-label">Difference:</span>
-      <span class="delta-amount" style="color:${diffColor}">${fmt(diff)}</span>
-      <span class="delta-badge" style="background:${badgeBg};color:${diffColor};border:1px solid ${badgeBorder}">${badgeText}</span>
-    `;
+    deltaBar.innerHTML =
+      '<span class="delta-label">Difference:</span>' +
+      '<span class="delta-amount" style="color:' + diffColor + '">' + fmt(diff) + '</span>' +
+      '<span class="delta-badge" style="background:' + badgeBg + ';color:' + diffColor + ';border:1px solid ' + badgeBorder + '">' + badgeText + '</span>';
   } else {
     deltaBar.style.display = 'none';
   }
 }
 
 function clearAll() {
-  document.querySelectorAll('.input-field').forEach(el => el.value = '');
+  document.querySelectorAll('.input-field').forEach(function(el) { el.value = ''; el.classList.remove('derived-text'); });
+  document.querySelectorAll('.input-wrap').forEach(function(el) { el.classList.remove('derived'); });
+  document.getElementById('propel-cap-solar').value = '4.85';
+  document.getElementById('propel-cap-batt').value = '2000';
   adders = { hdm: [], propel: [] };
+  hdmLastEdited = [];
+  propelLastEdited = [];
   renderAdders('hdm');
   renderAdders('propel');
   calc();
+}
+
+/* ── Download as PDF ── */
+async function downloadResults() {
+  const btn = document.querySelector('.btn-download');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Generating PDF…';
+  btn.disabled = true;
+
+  try {
+    // Check libraries loaded
+    if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+      // Fallback to browser print
+      window.print();
+      btn.textContent = origText;
+      btn.disabled = false;
+      return;
+    }
+    // Hide buttons for the capture
+    const topBar = document.querySelector('.top-bar');
+    const addBtns = document.querySelectorAll('.btn-add');
+    const removeBtns = document.querySelectorAll('.btn-remove');
+    topBar.style.display = 'none';
+    addBtns.forEach(function(b) { b.style.display = 'none'; });
+    removeBtns.forEach(function(b) { b.style.display = 'none'; });
+
+    // Capture the full page
+    const canvas = await html2canvas(document.body, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#f0f0f2',
+      width: document.body.scrollWidth,
+      height: document.body.scrollHeight,
+      windowWidth: document.body.scrollWidth,
+      windowHeight: document.body.scrollHeight,
+    });
+
+    // Restore buttons
+    topBar.style.display = '';
+    addBtns.forEach(function(b) { b.style.display = ''; });
+    removeBtns.forEach(function(b) { b.style.display = ''; });
+
+    // Build PDF — fit captured image to pages
+    const imgData = canvas.toDataURL('image/png');
+    const imgW = canvas.width;
+    const imgH = canvas.height;
+
+    // Use landscape if content is wide, else portrait
+    const pageW = 215.9; // letter width mm
+    const pageH = 279.4; // letter height mm
+    const margin = 10;
+    const usableW = pageW - margin * 2;
+    const usableH = pageH - margin * 2;
+
+    const ratio = imgW / imgH;
+    const pdfImgW = usableW;
+    const pdfImgH = usableW / ratio;
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: pdfImgH > usableH ? 'portrait' : 'portrait',
+      unit: 'mm',
+      format: 'letter',
+    });
+
+    // If the image is taller than one page, split across pages
+    if (pdfImgH <= usableH) {
+      pdf.addImage(imgData, 'PNG', margin, margin, pdfImgW, pdfImgH);
+    } else {
+      // Scale: how many px per mm
+      const pxPerMm = imgW / pdfImgW;
+      const sliceHeightPx = usableH * pxPerMm;
+      let yOffset = 0;
+      let page = 0;
+
+      while (yOffset < imgH) {
+        if (page > 0) pdf.addPage();
+
+        // Create a slice canvas
+        const sliceH = Math.min(sliceHeightPx, imgH - yOffset);
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = imgW;
+        sliceCanvas.height = sliceH;
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, yOffset, imgW, sliceH, 0, 0, imgW, sliceH);
+
+        const sliceData = sliceCanvas.toDataURL('image/png');
+        const sliceMmH = sliceH / pxPerMm;
+        pdf.addImage(sliceData, 'PNG', margin, margin, pdfImgW, sliceMmH);
+
+        yOffset += sliceH;
+        page++;
+      }
+    }
+
+    // Add footer with timestamp
+    const now = new Date();
+    const stamp = 'Generated ' + now.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) +
+      ' at ' + now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    const pageCount = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setTextColor(150);
+      pdf.text(stamp, pageW / 2, pageH - 5, { align: 'center' });
+    }
+
+    pdf.save('TPO_Comparison_' + now.toISOString().slice(0, 10) + '.pdf');
+  } catch (err) {
+    console.error('PDF generation failed:', err);
+    alert('PDF generation failed. Try using Print → Save as PDF instead.');
+  }
+
+  btn.textContent = origText;
+  btn.disabled = false;
 }
 
 // Init
