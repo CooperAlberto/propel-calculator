@@ -23,17 +23,37 @@
   .btn:hover { background: #f7f7f8; }
   .btn-clear { color: #c0392b; }
   .btn-download { color: #1a5ab8; }
-  .columns { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+  .columns { display: flex; gap: 20px; flex-wrap: nowrap; margin-bottom: 24px; align-items: flex-start; }
+  @media (max-width: 800px) { .columns { flex-wrap: wrap; } }
   .panel {
-    flex: 1; min-width: 360px; background: #fff; border-radius: 8px;
-    padding: 28px 24px; border: 2px solid #dddde0;
+    flex: 1; min-width: 0; background: #fff; border-radius: 8px;
+    padding: 0; border: 2px solid #dddde0; overflow: hidden;
   }
   .panel-hdm { border-color: #b8dcc8; }
   .panel-propel { border-color: #b0c8e8; }
-  .panel-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+
+  /* Collapsible panel header */
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; cursor: pointer; user-select: none;
+    border-bottom: 2px solid transparent; transition: background 0.15s;
+  }
+  .panel-hdm .panel-header { border-bottom-color: #b8dcc8; background: #f0faf4; }
+  .panel-propel .panel-header { border-bottom-color: #b0c8e8; background: #f0f4fd; }
+  .panel-header:hover { filter: brightness(0.97); }
+  .panel-header-left { display: flex; flex-direction: column; gap: 2px; }
+  .panel-title { font-size: 20px; font-weight: 700; }
   .panel-title.hdm { color: #1a7a42; }
   .panel-title.propel { color: #1a5ab8; }
-  .panel-sub { font-size: 13px; color: #8e8e99; margin-bottom: 18px; }
+  .panel-sub { font-size: 12px; color: #8e8e99; }
+  .collapse-icon {
+    font-size: 20px; color: #8e8e99; transition: transform 0.25s; line-height: 1;
+    flex-shrink: 0;
+  }
+  .panel.collapsed .collapse-icon { transform: rotate(-90deg); }
+  .panel-body { padding: 24px 24px 28px; }
+  .panel.collapsed .panel-body { display: none; }
+
   .cap-box {
     border-radius: 6px; padding: 10px 14px; margin-bottom: 18px;
     font-size: 13px; color: #5f5f6b; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
@@ -51,27 +71,28 @@
   }
   .cap-edit-input:focus { border-color: #1a5ab8; }
   .section-hdr {
-    font-size: 13px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 1.5px; margin-bottom: 12px; margin-top: 8px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; margin-bottom: 12px; margin-top: 20px;
   }
+  .section-hdr:first-child { margin-top: 0; }
   .section-hdr.hdm { color: #1a7a42; }
   .section-hdr.propel { color: #1a5ab8; }
-  .section-hdr.neutral { color: #1a1a1a; }
+  .section-hdr.neutral { color: #5f5f6b; }
   .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
   .input-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-  .field-label { font-size: 14px; color: #5f5f6b; font-weight: 600; margin-bottom: 5px; }
-  .field-sub { font-size: 12px; color: #8e8e99; margin-bottom: 5px; }
+  .field-label { font-size: 13px; color: #5f5f6b; font-weight: 600; margin-bottom: 5px; }
+  .field-sub { font-size: 11px; color: #8e8e99; margin-bottom: 6px; }
   .input-wrap {
     display: flex; align-items: center; gap: 6px;
-    background: #fff; border: 1.5px solid #ccccd0; border-radius: 6px; padding: 10px 14px;
+    background: #fff; border: 1.5px solid #ccccd0; border-radius: 6px; padding: 9px 13px;
   }
   .input-wrap:focus-within { border-color: #888; }
   .input-wrap.derived { background: #f7f7f8; border-style: dashed; }
-  .input-prefix { color: #8e8e99; font-weight: 600; font-size: 16px; }
-  .input-suffix { color: #8e8e99; font-size: 14px; white-space: nowrap; font-weight: 500; }
+  .input-prefix { color: #8e8e99; font-weight: 600; font-size: 15px; }
+  .input-suffix { color: #8e8e99; font-size: 13px; white-space: nowrap; font-weight: 500; }
   .input-field {
     background: none; border: none; outline: none; color: #1a1a1a;
-    width: 100%; font-size: 17px; font-weight: 500; font-family: inherit;
+    width: 100%; font-size: 16px; font-weight: 500; font-family: inherit;
   }
   .input-field::placeholder { color: #ccccd0; }
   .input-field.derived-text { color: #5f5f6b; }
@@ -83,60 +104,112 @@
   }
   .btn-add {
     background: none; border-radius: 6px; padding: 8px 0; width: 100%;
-    font-size: 14px; cursor: pointer; font-weight: 600; margin-bottom: 16px;
+    font-size: 13px; cursor: pointer; font-weight: 600; margin-bottom: 16px;
   }
   .btn-add.hdm { border: 1.5px dashed #b8dcc8; color: #1a7a42; }
   .btn-add.propel { border: 1.5px dashed #b0c8e8; color: #1a5ab8; }
   .btn-add:hover { opacity: 0.8; }
-  .cap-warn {
-    background: #fdf0ee; border: 1.5px solid #f0c0b8; border-radius: 6px;
-    padding: 10px 14px; font-size: 14px; color: #c0392b; margin-top: 8px;
-    display: flex; align-items: center; gap: 8px; font-weight: 500;
+
+  /* ── Results sections ── */
+  .results-outer { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+
+  .res-section {
+    border-radius: 7px; overflow: hidden; border: 1px solid #dddde0;
   }
-  .results-box {
-    background: #f7f7f8; border-radius: 6px; padding: 18px;
-    border: 1px solid #dddde0; margin-top: 24px;
+  .res-section-hdr {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; padding: 7px 14px; background: #f0f0f2;
+    border-bottom: 1px solid #dddde0; color: #5f5f6b;
   }
+  .res-section-hdr.hdm { background: #e8f5ee; color: #1a7a42; border-color: #b8dcc8; }
+  .res-section-hdr.propel { background: #e8f0fc; color: #1a5ab8; border-color: #b0c8e8; }
+  .res-section-body { background: #fff; padding: 10px 14px; }
+
   .result-line {
-    display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0;
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 5px 0; border-bottom: 1px solid #f0f0f2;
   }
-  .result-line.large { padding: 12px 0 4px; border-top: 2px solid #dddde0; }
-  .result-label { color: #5f5f6b; font-size: 15px; }
-  .result-label.dim { color: #8e8e99; }
-  .result-val { font-size: 17px; font-weight: 500; color: #1a1a1a; }
-  .result-val.neg { color: #c0392b; }
-  .result-val.dim { color: #8e8e99; font-size: 15px; }
-  .result-val.large { font-size: 24px; font-weight: 700; }
-  .result-val.hdm { color: #1a7a42; }
-  .result-val.propel { color: #1a5ab8; }
+  .result-line:last-child { border-bottom: none; }
+  .result-line.total-line { padding: 9px 0 4px; border-top: 2px solid #e8e8ec; border-bottom: none; margin-top: 4px; }
+  .result-label { color: #5f5f6b; font-size: 14px; }
+  .result-label.dim { color: #aaaaaf; font-size: 13px; }
+  .result-label.bold { font-weight: 700; color: #1a1a1a; font-size: 15px; }
+  .result-val { font-size: 15px; font-weight: 500; color: #1a1a1a; text-align: right; }
+  .result-val.neg { color: #c0392b; font-weight: 600; }
+  .result-val.dim { color: #aaaaaf; font-size: 13px; font-weight: 400; }
+  .result-val.hdm-color { color: #1a7a42; }
+  .result-val.propel-color { color: #1a5ab8; }
+  .result-val.large { font-size: 22px; font-weight: 700; }
+  .result-val.warn { color: #c0392b; font-weight: 600; }
+
+  .warn-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fdf0ee; border: 1px solid #f0c0b8; border-radius: 4px;
+    padding: 2px 8px; font-size: 11px; color: #c0392b; font-weight: 600; margin-left: 8px;
+  }
+
+  .proposal-input-block {
+    background: #f9f9fb; border: 1px solid #e4e4e8; border-radius: 6px;
+    padding: 10px 12px; margin-bottom: 8px;
+  }
+  .proposal-input-block:last-child { margin-bottom: 0; }
+  .proposal-input-title { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+  .proposal-input-value { font-size: 19px; font-weight: 700; margin: 2px 0 3px; }
+  .proposal-input-value.hdm-color { color: #1a7a42; }
+  .proposal-input-value.propel-color { color: #1a5ab8; }
+  .proposal-input-sub { font-size: 11px; color: #8e8e99; margin-bottom: 4px; }
+  .proposal-input-hint {
+    font-size: 11px; color: #fff; font-weight: 600;
+    display: inline-block; padding: 2px 8px; border-radius: 3px; margin-top: 2px;
+  }
+  .proposal-input-hint.hdm { background: #1a7a42; }
+  .proposal-input-hint.propel { background: #1a5ab8; }
+
+  /* ── Comparison ── */
   .comparison {
     background: #fff; border-radius: 8px; padding: 24px 28px;
     border: 2px solid #dddde0; margin-bottom: 24px;
   }
-  .comp-grid { display: grid; grid-template-columns: 1fr 180px 1fr; font-size: 15px; }
-  .comp-cell { padding: 8px 0; border-bottom: 1px solid #dddde0; font-weight: 500; font-size: 16px; }
+  .comp-grid {
+    display: grid; grid-template-columns: 1fr 200px 1fr;
+    font-size: 15px; margin-top: 12px;
+  }
+  .comp-header-cell {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 6px 0 10px; border-bottom: 2px solid #dddde0;
+  }
+  .comp-header-cell.hdm { color: #1a7a42; text-align: right; padding-right: 20px; }
+  .comp-header-cell.propel { color: #1a5ab8; text-align: left; padding-left: 20px; }
+  .comp-header-cell.center { text-align: center; color: #8e8e99; }
+  .comp-cell { padding: 7px 0; border-bottom: 1px solid #f0f0f2; font-weight: 500; font-size: 15px; }
   .comp-cell.last { border-bottom: none; }
   .comp-cell.right { text-align: right; padding-right: 20px; }
-  .comp-cell.center { text-align: center; color: #8e8e99; font-size: 13px; }
+  .comp-cell.center { text-align: center; color: #8e8e99; font-size: 12px; font-weight: 400; display: flex; align-items: center; justify-content: center; }
   .comp-cell.left { text-align: left; padding-left: 20px; }
-  .comp-cell.bold { font-weight: 700; font-size: 22px; }
-  .comp-cell.center.bold { font-size: 15px; font-weight: 700; }
+  .comp-cell.bold { font-weight: 700; font-size: 21px; padding-top: 12px; }
+  .comp-cell.bold.right { color: #1a7a42; }
+  .comp-cell.bold.left { color: #1a5ab8; }
+  .comp-cell.bold.center { font-size: 13px; font-weight: 700; color: #5f5f6b; }
+  .comp-cell.neg { color: #c0392b; }
+  .comp-cell.warn-cell { color: #c0392b; }
   .delta-bar {
-    margin-top: 18px; padding: 14px 20px; border-radius: 6px;
+    margin-top: 16px; padding: 14px 20px; border-radius: 6px;
     background: #f7f7f8; border: 1.5px solid #dddde0;
     display: flex; justify-content: center; align-items: center; gap: 14px;
   }
-  .delta-label { color: #5f5f6b; font-size: 15px; font-weight: 500; }
+  .delta-label { color: #5f5f6b; font-size: 14px; font-weight: 500; }
   .delta-amount { font-size: 22px; font-weight: 700; }
   .delta-badge {
-    font-size: 13px; padding: 4px 14px; border-radius: 4px; font-weight: 700;
+    font-size: 12px; padding: 4px 14px; border-radius: 4px; font-weight: 700;
   }
   .footer { text-align: center; color: #8e8e99; font-size: 12px; padding: 8px 0; }
+
   @media print {
     body { padding: 10px; background: #fff; }
     .btn, .btn-add, .btn-remove, .top-bar { display: none !important; }
     .panel, .comparison { break-inside: avoid; border-width: 1px; }
     .input-wrap { border-color: #eee; }
+    .panel.collapsed .panel-body { display: block !important; }
   }
 </style>
 </head>
@@ -153,124 +226,134 @@
 </div>
 
 <div class="columns">
+
   <!-- ═══ HDM ═══ -->
-  <div class="panel panel-hdm">
-    <div class="panel-title hdm">HDM Capital</div>
-    <div class="panel-sub">Solar: 25% discount · Battery: 30% discount · Rebates eligible<br>Auto-weights cost to battery to maximize discount</div>
-
-    <div class="cap-box hdm" id="hdm-caps">
-      <span class="cap-label hdm">Active Caps: </span>
-      Solar <strong>$4.75/W</strong> · Battery <strong>$1,800/kWh</strong>
+  <div class="panel panel-hdm" id="hdm-panel">
+    <div class="panel-header" onclick="togglePanel('hdm')">
+      <div class="panel-header-left">
+        <div class="panel-title hdm">HDM Capital</div>
+        <div class="panel-sub">Solar: 25% discount · Battery: 30% discount · Rebates eligible</div>
+      </div>
+      <span class="collapse-icon">▾</span>
     </div>
-
-    <div class="section-hdr hdm">System Sizing</div>
-    <div class="input-grid">
-      <div>
-        <div class="field-label">Solar Size</div>
-        <div class="input-wrap"><input class="input-field" id="hdm-solar-kw" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('kw');calc()"><span class="input-suffix">kW</span></div>
+    <div class="panel-body">
+      <div class="cap-box hdm" id="hdm-caps">
+        <span class="cap-label hdm">Active Caps: </span>
+        Solar <strong>$4.75/W</strong> · Battery <strong>$1,800/kWh</strong>
       </div>
-      <div>
-        <div class="field-label">Battery Size</div>
-        <div class="input-wrap"><input class="input-field" id="hdm-batt-kwh" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('kwh');calc()"><span class="input-suffix">kWh</span></div>
+
+      <div class="section-hdr hdm">System Sizing</div>
+      <div class="input-grid">
+        <div>
+          <div class="field-label">Solar Size</div>
+          <div class="input-wrap"><input class="input-field" id="hdm-solar-kw" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('kw');calc()"><span class="input-suffix">kW</span></div>
+        </div>
+        <div>
+          <div class="field-label">Battery Size</div>
+          <div class="input-wrap"><input class="input-field" id="hdm-batt-kwh" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('kwh');calc()"><span class="input-suffix">kWh</span></div>
+        </div>
       </div>
-    </div>
 
-    <div class="section-hdr hdm">Pricing</div>
-    <div class="field-sub">Fill any two — the third auto-calculates</div>
-    <div class="input-grid-3">
-      <div>
-        <div class="field-label">Total System Price</div>
-        <div class="input-wrap" id="hdm-total-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-total" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('total');calc()"></div>
+      <div class="section-hdr hdm">Pricing</div>
+      <div class="field-sub">Fill any two — the third auto-calculates</div>
+      <div class="input-grid-3">
+        <div>
+          <div class="field-label">Total Price</div>
+          <div class="input-wrap" id="hdm-total-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-total" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('total');calc()"></div>
+        </div>
+        <div>
+          <div class="field-label">Solar Cost</div>
+          <div class="input-wrap" id="hdm-solar-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-solar-cost" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('solar');calc()"></div>
+        </div>
+        <div>
+          <div class="field-label">Battery Cost</div>
+          <div class="input-wrap" id="hdm-batt-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-batt-cost" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('batt');calc()"></div>
+        </div>
       </div>
-      <div>
-        <div class="field-label">Solar Cost</div>
-        <div class="input-wrap" id="hdm-solar-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-solar-cost" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('solar');calc()"></div>
-      </div>
-      <div>
-        <div class="field-label">Battery Cost</div>
-        <div class="input-wrap" id="hdm-batt-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-batt-cost" inputmode="decimal" placeholder="0" oninput="hdmPriceSync('batt');calc()"></div>
-      </div>
-    </div>
 
-    <div class="section-hdr hdm">Adders</div>
-    <div id="hdm-adders"></div>
-    <button class="btn-add hdm" onclick="addAdder('hdm')">+ Add Line Item</button>
+      <div class="section-hdr hdm">Adders</div>
+      <div id="hdm-adders"></div>
+      <button class="btn-add hdm" onclick="addAdder('hdm')">+ Add Line Item</button>
 
-    <div class="section-hdr hdm">Rebates</div>
-    <div class="field-label">Rebate Amount</div>
-    <div class="field-sub">SGIP, TECH Clean, utility rebates, etc.</div>
-    <div class="input-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-rebate" inputmode="decimal" placeholder="0" oninput="calc()"></div>
+      <div class="section-hdr hdm">Rebates</div>
+      <div class="field-label">Rebate Amount</div>
+      <div class="field-sub">SGIP, TECH Clean, utility rebates, etc.</div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="input-field" id="hdm-rebate" inputmode="decimal" placeholder="0" oninput="calc()"></div>
 
-    <div id="hdm-warnings" style="margin-top:4px"></div>
-
-    <div class="results-box" style="margin-top:24px">
-      <div class="section-hdr hdm" style="margin-top:0">Results — What to Enter in HDM</div>
-      <div id="hdm-results"></div>
+      <div class="results-outer" id="hdm-results-outer"></div>
     </div>
   </div>
 
   <!-- ═══ PROPEL ═══ -->
-  <div class="panel panel-propel">
-    <div class="panel-title propel">Concert Propel</div>
-    <div class="panel-sub">f(S,B,kWh) = 0.6588(S+B) − 18·kWh − 1,296 · Rebates typically N/A</div>
-
-    <div class="cap-box propel" id="propel-caps">
-      <span class="cap-label propel">Caps: </span>
-      Solar <input class="cap-edit-input" id="propel-cap-solar" value="4.85" oninput="calc()">/W
-      · Battery <input class="cap-edit-input" id="propel-cap-batt" value="2000" style="width:60px" oninput="calc()">/kWh
+  <div class="panel panel-propel" id="propel-panel">
+    <div class="panel-header" onclick="togglePanel('propel')">
+      <div class="panel-header-left">
+        <div class="panel-title propel">Concert Propel</div>
+        <div class="panel-sub">f(S,B,kWh) = 0.6588(S+B) − 18·kWh − 1,296 · Rebates typically N/A</div>
+      </div>
+      <span class="collapse-icon">▾</span>
     </div>
-
-    <div class="section-hdr propel">System Sizing</div>
-    <div class="input-grid">
-      <div>
-        <div class="field-label">Solar Size</div>
-        <div class="input-wrap"><input class="input-field" id="propel-solar-kw" inputmode="decimal" placeholder="0" oninput="propelPriceSync('kw');calc()"><span class="input-suffix">kW</span></div>
+    <div class="panel-body">
+      <div class="cap-box propel" id="propel-caps">
+        <span class="cap-label propel">Caps: </span>
+        Solar <input class="cap-edit-input" id="propel-cap-solar" value="4.85" oninput="calc()">/W
+        · Battery <input class="cap-edit-input" id="propel-cap-batt" value="2000" style="width:60px" oninput="calc()">/kWh
       </div>
-      <div>
-        <div class="field-label">Battery Size</div>
-        <div class="input-wrap"><input class="input-field" id="propel-batt-kwh" inputmode="decimal" placeholder="0" oninput="propelPriceSync('kwh');calc()"><span class="input-suffix">kWh</span></div>
+
+      <div class="section-hdr propel">System Sizing</div>
+      <div class="input-grid">
+        <div>
+          <div class="field-label">Solar Size</div>
+          <div class="input-wrap"><input class="input-field" id="propel-solar-kw" inputmode="decimal" placeholder="0" oninput="propelPriceSync('kw');calc()"><span class="input-suffix">kW</span></div>
+        </div>
+        <div>
+          <div class="field-label">Battery Size</div>
+          <div class="input-wrap"><input class="input-field" id="propel-batt-kwh" inputmode="decimal" placeholder="0" oninput="propelPriceSync('kwh');calc()"><span class="input-suffix">kWh</span></div>
+        </div>
       </div>
-    </div>
 
-    <div class="section-hdr propel">Pricing</div>
-    <div class="field-sub">Fill any two — the third auto-calculates</div>
-    <div class="input-grid-3">
-      <div>
-        <div class="field-label">Total System Price</div>
-        <div class="input-wrap" id="propel-total-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-total" inputmode="decimal" placeholder="0" oninput="propelPriceSync('total');calc()"></div>
+      <div class="section-hdr propel">Pricing</div>
+      <div class="field-sub">Fill any two — the third auto-calculates</div>
+      <div class="input-grid-3">
+        <div>
+          <div class="field-label">Total Price</div>
+          <div class="input-wrap" id="propel-total-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-total" inputmode="decimal" placeholder="0" oninput="propelPriceSync('total');calc()"></div>
+        </div>
+        <div>
+          <div class="field-label">Solar Cost</div>
+          <div class="input-wrap" id="propel-solar-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-solar-cost" inputmode="decimal" placeholder="0" oninput="propelPriceSync('solar');calc()"></div>
+        </div>
+        <div>
+          <div class="field-label">Battery Cost</div>
+          <div class="input-wrap" id="propel-batt-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-batt-cost" inputmode="decimal" placeholder="0" oninput="propelPriceSync('batt');calc()"></div>
+        </div>
       </div>
-      <div>
-        <div class="field-label">Solar Cost</div>
-        <div class="input-wrap" id="propel-solar-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-solar-cost" inputmode="decimal" placeholder="0" oninput="propelPriceSync('solar');calc()"></div>
-      </div>
-      <div>
-        <div class="field-label">Battery Cost</div>
-        <div class="input-wrap" id="propel-batt-cost-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-batt-cost" inputmode="decimal" placeholder="0" oninput="propelPriceSync('batt');calc()"></div>
-      </div>
-    </div>
 
-    <div class="section-hdr propel">Adders</div>
-    <div id="propel-adders"></div>
-    <button class="btn-add propel" onclick="addAdder('propel')">+ Add Line Item</button>
+      <div class="section-hdr propel">Adders</div>
+      <div id="propel-adders"></div>
+      <button class="btn-add propel" onclick="addAdder('propel')">+ Add Line Item</button>
 
-    <div class="section-hdr propel">Rebates</div>
-    <div class="field-label">Rebate Amount</div>
-    <div class="field-sub">Propel typically does not allow rebates</div>
-    <div class="input-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-rebate" inputmode="decimal" placeholder="0" oninput="calc()"></div>
+      <div class="section-hdr propel">Rebates</div>
+      <div class="field-label">Rebate Amount</div>
+      <div class="field-sub">Propel typically does not allow rebates</div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="input-field" id="propel-rebate" inputmode="decimal" placeholder="0" oninput="calc()"></div>
 
-    <div id="propel-warnings" style="margin-top:4px"></div>
-
-    <div class="results-box" style="margin-top:24px">
-      <div class="section-hdr propel" style="margin-top:0">Results — What to Enter in Propel</div>
-      <div id="propel-results"></div>
+      <div class="results-outer" id="propel-results-outer"></div>
     </div>
   </div>
 </div>
 
-<div class="comparison" id="comparison" style="display:none">
-  <div class="section-hdr neutral">Side-by-Side Comparison</div>
-  <div class="comp-grid" id="comp-grid"></div>
-  <div class="delta-bar" id="delta-bar" style="display:none"></div>
+<!-- ═══ COMPARISON ═══ -->
+<div class="comparison" id="comparison">
+  <div class="section-hdr neutral" style="margin-top:0">Side-by-Side Comparison</div>
+  <div class="comp-grid" id="comp-grid">
+    <div class="comp-header-cell hdm">HDM Capital</div>
+    <div class="comp-header-cell center"></div>
+    <div class="comp-header-cell propel">Concert Propel</div>
+  </div>
+  <div class="delta-bar" id="delta-bar">
+    <span class="delta-label" style="color:#8e8e99">Enter data above to compare programs</span>
+  </div>
 </div>
 
 <div class="footer">
@@ -280,19 +363,18 @@
 <script>
 /* ── HDM tiers ── */
 const HDM_SOLAR = [
-  {min:0,max:7,cap:4.75,label:"0–7 kW"},
-  {min:7.01,max:15,cap:4.50,label:"7.01–15 kW"},
-  {min:15.01,max:30,cap:4.25,label:"15.01–30 kW"},
-  {min:30.01,max:50,cap:4.00,label:"30.01–50 kW"},
+  {min:0,    max:7,    cap:4.75, label:"0–7 kW"},
+  {min:7.01, max:15,   cap:4.50, label:"7.01–15 kW"},
+  {min:15.01,max:30,   cap:4.25, label:"15.01–30 kW"},
+  {min:30.01,max:50,   cap:4.00, label:"30.01–50 kW"},
 ];
 const HDM_BATT = [
-  {min:0,max:15,cap:1800,label:"0–15 kWh"},
-  {min:15.01,max:30,cap:1600,label:"15.01–30 kWh"},
-  {min:30.01,max:45,cap:1200,label:"30.01–45 kWh"},
-  {min:45.01,max:60,cap:1000,label:"45.01–60 kWh"},
-  {min:60.01,max:100,cap:900,label:"60.01–100 kWh"},
+  {min:0,     max:15,  cap:1800, label:"0–15 kWh"},
+  {min:15.01, max:30,  cap:1600, label:"15.01–30 kWh"},
+  {min:30.01, max:45,  cap:1200, label:"30.01–45 kWh"},
+  {min:45.01, max:60,  cap:1000, label:"45.01–60 kWh"},
+  {min:60.01, max:100, cap:900,  label:"60.01–100 kWh"},
 ];
-
 function hdmSolarTier(kw) { return HDM_SOLAR.find(t => kw >= t.min && kw <= t.max) || HDM_SOLAR[HDM_SOLAR.length-1]; }
 function hdmBattTier(kwh) { return HDM_BATT.find(t => kwh >= t.min && kwh <= t.max) || HDM_BATT[HDM_BATT.length-1]; }
 
@@ -333,25 +415,34 @@ function renderAdders(side) {
 /* ── Helpers ── */
 function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
 function fmt(n) { return '$' + Math.round(Math.abs(n)).toLocaleString(); }
+function fmtRaw(n) { return '$' + Math.round(n).toLocaleString(); }
 
-function line(label, val, cls) {
-  cls = cls || '';
-  const isStr = typeof val === 'string';
-  return '<div class="result-line ' + (cls.includes('large') ? 'large' : '') + '">' +
-    '<span class="result-label ' + (cls.includes('dim') ? 'dim' : '') + '">' + label + '</span>' +
-    '<span class="result-val ' + cls + '">' + (isStr ? val : ((cls.includes('neg') && val > 0 ? '−' : '') + fmt(val))) + '</span></div>';
+function mkLine(label, valStr, labelCls, valCls, extraClass) {
+  return '<div class="result-line' + (extraClass ? ' ' + extraClass : '') + '">' +
+    '<span class="result-label' + (labelCls ? ' ' + labelCls : '') + '">' + label + '</span>' +
+    '<span class="result-val' + (valCls ? ' ' + valCls : '') + '">' + valStr + '</span></div>';
+}
+
+function mkSection(hdrText, hdrCls, bodyHtml) {
+  return '<div class="res-section">' +
+    '<div class="res-section-hdr' + (hdrCls ? ' ' + hdrCls : '') + '">' + hdrText + '</div>' +
+    '<div class="res-section-body">' + bodyHtml + '</div>' +
+    '</div>';
+}
+
+/* ── Panel collapse ── */
+function togglePanel(side) {
+  document.getElementById(side + '-panel').classList.toggle('collapsed');
 }
 
 /* ── Price sync: fill any 2 of 3, derive the third ── */
-let hdmLastEdited = []; // track which 2 fields user touched
+let hdmLastEdited = [];
 let propelLastEdited = [];
 
 function trackEdited(list, field) {
-  // Remove this field if already in list, push to end
   const idx = list.indexOf(field);
   if (idx !== -1) list.splice(idx, 1);
   list.push(field);
-  // Keep only last 2
   while (list.length > 2) list.shift();
 }
 
@@ -359,37 +450,25 @@ function hdmPriceSync(source) {
   trackEdited(hdmLastEdited, source);
   const totalEl = document.getElementById('hdm-total');
   const solarEl = document.getElementById('hdm-solar-cost');
-  const battEl = document.getElementById('hdm-batt-cost');
-  const totalW = document.getElementById('hdm-total-wrap');
-  const solarW = document.getElementById('hdm-solar-cost-wrap');
-  const battW = document.getElementById('hdm-batt-cost-wrap');
-
-  // Reset styling
+  const battEl  = document.getElementById('hdm-batt-cost');
+  const totalW  = document.getElementById('hdm-total-wrap');
+  const solarW  = document.getElementById('hdm-solar-cost-wrap');
+  const battW   = document.getElementById('hdm-batt-cost-wrap');
   [totalW, solarW, battW].forEach(w => w.classList.remove('derived'));
   [totalEl, solarEl, battEl].forEach(el => el.classList.remove('derived-text'));
-
   const has = hdmLastEdited.slice();
   if (has.length < 2) return;
-
   const derived = ['total','solar','batt'].find(f => !has.includes(f));
   if (!derived) return;
-
   const t = parseFloat(totalEl.value) || 0;
   const s = parseFloat(solarEl.value) || 0;
-  const b = parseFloat(battEl.value) || 0;
-
+  const b = parseFloat(battEl.value)  || 0;
   if (derived === 'total' && s + b > 0) {
-    totalEl.value = (s + b) || '';
-    totalW.classList.add('derived');
-    totalEl.classList.add('derived-text');
+    totalEl.value = s + b; totalW.classList.add('derived'); totalEl.classList.add('derived-text');
   } else if (derived === 'solar' && t >= b) {
-    solarEl.value = t - b > 0 ? (t - b) : '';
-    solarW.classList.add('derived');
-    solarEl.classList.add('derived-text');
+    solarEl.value = t - b > 0 ? (t - b) : ''; solarW.classList.add('derived'); solarEl.classList.add('derived-text');
   } else if (derived === 'batt' && t >= s) {
-    battEl.value = t - s > 0 ? (t - s) : '';
-    battW.classList.add('derived');
-    battEl.classList.add('derived-text');
+    battEl.value = t - s > 0 ? (t - s) : ''; battW.classList.add('derived'); battEl.classList.add('derived-text');
   }
 }
 
@@ -397,51 +476,41 @@ function propelPriceSync(source) {
   trackEdited(propelLastEdited, source);
   const totalEl = document.getElementById('propel-total');
   const solarEl = document.getElementById('propel-solar-cost');
-  const battEl = document.getElementById('propel-batt-cost');
-  const totalW = document.getElementById('propel-total-wrap');
-  const solarW = document.getElementById('propel-solar-cost-wrap');
-  const battW = document.getElementById('propel-batt-cost-wrap');
-
+  const battEl  = document.getElementById('propel-batt-cost');
+  const totalW  = document.getElementById('propel-total-wrap');
+  const solarW  = document.getElementById('propel-solar-cost-wrap');
+  const battW   = document.getElementById('propel-batt-cost-wrap');
   [totalW, solarW, battW].forEach(w => w.classList.remove('derived'));
   [totalEl, solarEl, battEl].forEach(el => el.classList.remove('derived-text'));
-
   const has = propelLastEdited.slice();
   if (has.length < 2) return;
-
   const derived = ['total','solar','batt'].find(f => !has.includes(f));
   if (!derived) return;
-
   const t = parseFloat(totalEl.value) || 0;
   const s = parseFloat(solarEl.value) || 0;
-  const b = parseFloat(battEl.value) || 0;
-
+  const b = parseFloat(battEl.value)  || 0;
   if (derived === 'total' && s + b > 0) {
-    totalEl.value = (s + b) || '';
-    totalW.classList.add('derived');
-    totalEl.classList.add('derived-text');
+    totalEl.value = s + b; totalW.classList.add('derived'); totalEl.classList.add('derived-text');
   } else if (derived === 'solar' && t >= b) {
-    solarEl.value = t - b > 0 ? (t - b) : '';
-    solarW.classList.add('derived');
-    solarEl.classList.add('derived-text');
+    solarEl.value = t - b > 0 ? (t - b) : ''; solarW.classList.add('derived'); solarEl.classList.add('derived-text');
   } else if (derived === 'batt' && t >= s) {
-    battEl.value = t - s > 0 ? (t - s) : '';
-    battW.classList.add('derived');
-    battEl.classList.add('derived-text');
+    battEl.value = t - s > 0 ? (t - s) : ''; battW.classList.add('derived'); battEl.classList.add('derived-text');
   }
 }
 
 /* ── Main calc ── */
 function calc() {
-  // ═══ HDM ═══
-  const hSolarKw = v('hdm-solar-kw');
-  const hBattKwh = v('hdm-batt-kwh');
+
+  /* ═══ HDM ═══ */
+  const hSolarKw   = v('hdm-solar-kw');
+  const hBattKwh   = v('hdm-batt-kwh');
   const hSolarCost = v('hdm-solar-cost');
-  const hBattCost = v('hdm-batt-cost');
-  const hRebate = v('hdm-rebate');
+  const hBattCost  = v('hdm-batt-cost');
+  const hRebate    = v('hdm-rebate');
   const hAdderTotal = adders.hdm.reduce((s, a) => s + (a.amount || 0), 0);
 
   const hSolarT = hdmSolarTier(hSolarKw);
-  const hBattT = hdmBattTier(hBattKwh);
+  const hBattT  = hdmBattTier(hBattKwh);
 
   // Update cap display
   document.getElementById('hdm-caps').innerHTML =
@@ -451,280 +520,407 @@ function calc() {
     ' · Battery <strong>$' + hBattT.cap.toLocaleString() + '/kWh</strong>' +
     (hBattKwh > 0 ? ' <span class="cap-dim">(' + hBattT.label + ')</span>' : '');
 
-  // AUTO-WEIGHT: push as much as possible into battery first
-  const hTotalEquipment = hSolarCost + hBattCost + hAdderTotal;
-  const hMaxBatt = hBattKwh * hBattT.cap;
-  const hMaxSolar = hSolarKw * hSolarT.cap * 1000;
+  // Total project cost before any optimization
+  const hTotalProjectCost = hSolarCost + hBattCost + hAdderTotal;
 
-  // Battery gets as much as possible up to cap
-  const hFinalBatt = Math.min(hTotalEquipment, hMaxBatt);
-  // Remainder goes to solar
-  const hRemainder = hTotalEquipment - hFinalBatt;
-  const hFinalSolar = Math.min(hRemainder, hMaxSolar);
-  // Any leftover is overflow
-  const hOverflow = hRemainder - hFinalSolar;
+  // AUTO-WEIGHT: maximize battery allocation first
+  const hMaxBatt  = hBattKwh  * hBattT.cap;
+  const hMaxSolar = hSolarKw  * hSolarT.cap * 1000;
 
-  const hFinalBattPer = hBattKwh > 0 ? hFinalBatt / hBattKwh : 0;
-  const hFinalSolarPer = hSolarKw > 0 ? hFinalSolar / (hSolarKw * 1000) : 0;
-  const hProject = hFinalSolar + hFinalBatt;
-  const hSolarDisc = hFinalSolar * 0.25;
-  const hBattDisc = hFinalBatt * 0.30;
-  const hTotalDisc = hSolarDisc + hBattDisc;
-  const hAfterDisc = hProject - hTotalDisc;
-  const hNet = hAfterDisc - hRebate;
+  const hFinalBatt  = Math.min(hTotalProjectCost, hMaxBatt);
+  const hRemaining  = hTotalProjectCost - hFinalBatt;
+  const hFinalSolar = Math.min(hRemaining, hMaxSolar);
+  const hOverflow   = Math.max(0, hRemaining - hFinalSolar);
+  const hEligible   = hFinalSolar + hFinalBatt; // amount fitting under caps
 
-  // HDM warnings
-  let hWarn = '';
-  if (hOverflow > 0)
-    hWarn += '<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>' + fmt(hOverflow) + '</strong> exceeds combined caps — cannot be financed</span></div>';
-  document.getElementById('hdm-warnings').innerHTML = hWarn;
+  const hFinalBattPerKwh  = hBattKwh  > 0 ? hFinalBatt  / hBattKwh             : 0;
+  const hFinalSolarPerW   = hSolarKw  > 0 ? hFinalSolar / (hSolarKw * 1000)    : 0;
 
-  // HDM results
-  let hR = '';
-  hR += line('Battery Cost (optimized)', hFinalBatt);
-  hR += line('  ↳ Effective $/kWh', hBattKwh > 0 ? '$' + hFinalBattPer.toFixed(0) + '/kWh' : '—', 'dim');
-  hR += line('Solar Cost (remainder)', hFinalSolar);
-  hR += line('  ↳ Effective $/W', hSolarKw > 0 ? '$' + hFinalSolarPer.toFixed(2) + '/W' : '—', 'dim');
-  if (hOverflow > 0) hR += line('⚠ Overflow (unfunded)', hOverflow, 'neg');
-  hR += '<div style="height:10px"></div>';
-  hR += line('Project Cost', hProject);
-  hR += line('Battery Discount (30%)', hBattDisc, 'neg');
-  hR += line('Solar Discount (25%)', hSolarDisc, 'neg');
-  hR += line('Total Discount', hTotalDisc, 'neg');
-  hR += line('After Discount', hAfterDisc);
-  if (hRebate > 0) hR += line('Rebates', hRebate, 'neg');
-  hR += line('Net System Price', hNet, 'large hdm');
-  document.getElementById('hdm-results').innerHTML = hR;
+  const hSolarDisc  = hFinalSolar * 0.25;
+  const hBattDisc   = hFinalBatt  * 0.30;
+  const hTotalDisc  = hSolarDisc + hBattDisc;
+  const hAfterDisc  = hEligible - hTotalDisc;
+  const hNetCost    = hEligible - hTotalDisc - hRebate + hOverflow;
 
-  // ═══ PROPEL ═══
-  const pSolarKw = v('propel-solar-kw');
-  const pBattKwh = v('propel-batt-kwh');
+  // Headroom = total cap space minus total project cost (only when project < caps)
+  const hTotalCap   = hMaxSolar + hMaxBatt;
+  const hHeadroom   = Math.max(0, hTotalCap - hTotalProjectCost);
+
+  // Build results HTML
+  let hHTML = '';
+
+  // Section 1: Project Summary
+  let s1 = '';
+  s1 += mkLine('Total Project Cost Before Discount', fmt(hTotalProjectCost), '', '');
+  s1 += mkLine('Amount Eligible for HDM', fmt(hEligible), '', 'hdm-color');
+  if (hOverflow > 0) {
+    s1 += mkLine('⚠ Overflow — Cannot Be Financed', fmt(hOverflow), '', 'warn');
+  } else {
+    s1 += mkLine('Overflow', '$0', 'dim', 'dim');
+  }
+  if (hHeadroom > 0) {
+    s1 += mkLine('Headroom Remaining', fmt(hHeadroom), '', 'hdm-color');
+  } else {
+    s1 += mkLine('Headroom Remaining', '$0', 'dim', 'dim');
+  }
+  hHTML += mkSection('Project Summary', 'hdm', s1);
+
+  // Section 2: Discounts & Rebates
+  let s2 = '';
+  s2 += mkLine('Total Discount', '−' + fmt(hTotalDisc), '', 'neg');
+  s2 += mkLine('  Battery Discount (30% of ' + fmt(hFinalBatt) + ')', '−' + fmt(hBattDisc), 'dim', 'dim');
+  s2 += mkLine('  Solar Discount (25% of ' + fmt(hFinalSolar) + ')', '−' + fmt(hSolarDisc), 'dim', 'dim');
+  s2 += mkLine('Rebates', hRebate > 0 ? '−' + fmt(hRebate) : '$0', hRebate === 0 ? 'dim' : '', hRebate === 0 ? 'dim' : 'neg');
+  hHTML += mkSection('Discounts & Rebates', 'hdm', s2);
+
+  // Section 3: Project Cost
+  let s3 = '';
+  s3 += mkLine('Amount Eligible for HDM', fmt(hEligible), '', '');
+  s3 += mkLine('Total Discounts & Rebates', '−' + fmt(hTotalDisc + hRebate), '', 'neg');
+  s3 += mkLine('Overflow', hOverflow > 0 ? '+' + fmt(hOverflow) : '$0', hOverflow === 0 ? 'dim' : '', hOverflow === 0 ? 'dim' : 'warn');
+  s3 += mkLine('Net Cost to Customer', fmt(hNetCost), 'bold', 'large hdm-color', 'total-line');
+  hHTML += mkSection('Project Cost', 'hdm', s3);
+
+  // Section 4: Proposal Inputs
+  let s4 = '';
+  s4 += '<div class="proposal-input-block">' +
+    '<div class="proposal-input-title">New Solar Price</div>' +
+    '<div class="proposal-input-value hdm-color">' + fmt(hFinalSolar) + '</div>' +
+    '<div class="proposal-input-sub">' + (hSolarKw > 0 ? '$' + hFinalSolarPerW.toFixed(2) + '/W effective' : '—') + '</div>' +
+    '<span class="proposal-input-hint hdm">Enter under Solar Cost in HDM</span>' +
+    '</div>';
+  s4 += '<div class="proposal-input-block">' +
+    '<div class="proposal-input-title">New Battery Price</div>' +
+    '<div class="proposal-input-value hdm-color">' + fmt(hFinalBatt) + '</div>' +
+    '<div class="proposal-input-sub">' + (hBattKwh > 0 ? '$' + hFinalBattPerKwh.toFixed(0) + '/kWh effective' : '—') + '</div>' +
+    '<span class="proposal-input-hint hdm">Enter under Battery Cost in HDM</span>' +
+    '</div>';
+  // Overflow block
+  s4 += '<div class="proposal-input-block" style="background:#fff8f7;border-color:#f0c0b8">' +
+    '<div class="proposal-input-title" style="color:#c0392b">Overflow</div>' +
+    '<div class="proposal-input-value" style="color:' + (hOverflow > 0 ? '#c0392b' : '#aaaaaf') + '">' + fmt(hOverflow) + '</div>' +
+    '<div class="proposal-input-sub" style="color:' + (hOverflow > 0 ? '#c0392b' : '#aaaaaf') + '">' +
+      (hOverflow > 0 ? '⚠ This amount must be paid in cash or financed another way' : 'No overflow — full project fits within caps') +
+    '</div>' +
+    '</div>';
+  hHTML += mkSection('Proposal Inputs', 'hdm', s4);
+
+  document.getElementById('hdm-results-outer').innerHTML = hHTML;
+
+  /* ═══ PROPEL ═══ */
+  const pSolarKw   = v('propel-solar-kw');
+  const pBattKwh   = v('propel-batt-kwh');
   const pSolarCost = v('propel-solar-cost');
-  const pBattCost = v('propel-batt-cost');
-  const pRebate = v('propel-rebate');
+  const pBattCost  = v('propel-batt-cost');
+  const pRebate    = v('propel-rebate');
   const pAdderTotal = adders.propel.reduce((s, a) => s + (a.amount || 0), 0);
-  const pCapSolar = parseFloat(document.getElementById('propel-cap-solar').value) || 4.85;
-  const pCapBatt = parseFloat(document.getElementById('propel-cap-batt').value) || 2000;
+  const pCapSolar  = parseFloat(document.getElementById('propel-cap-solar').value) || 4.85;
+  const pCapBatt   = parseFloat(document.getElementById('propel-cap-batt').value)  || 2000;
 
+  // Total project cost before optimization
+  const pTotalProjectCost = pSolarCost + pBattCost + pAdderTotal;
+
+  // Proportional adder spread
   const pMaxSolar = pSolarKw * pCapSolar * 1000;
-  const pMaxBatt = pBattKwh * pCapBatt;
-  const pSolarHR = Math.max(0, pMaxSolar - pSolarCost);
-  const pBattHR = Math.max(0, pMaxBatt - pBattCost);
-  const pTotalHR = pSolarHR + pBattHR;
+  const pMaxBatt  = pBattKwh * pCapBatt;
+  const pSolarHR  = Math.max(0, pMaxSolar - pSolarCost);
+  const pBattHR   = Math.max(0, pMaxBatt  - pBattCost);
+  const pTotalHR  = pSolarHR + pBattHR;
   let pSolarAA = 0, pBattAA = 0, pOverflow = 0;
   if (pTotalHR > 0 && pAdderTotal > 0) {
-    pSolarAA = Math.min(pAdderTotal * (pSolarHR / pTotalHR), pSolarHR);
-    pBattAA = Math.min(pAdderTotal * (pBattHR / pTotalHR), pBattHR);
-    pOverflow = Math.max(0, pAdderTotal - pSolarAA - pBattAA);
+    pSolarAA   = Math.min(pAdderTotal * (pSolarHR / pTotalHR), pSolarHR);
+    pBattAA    = Math.min(pAdderTotal * (pBattHR  / pTotalHR), pBattHR);
+    pOverflow  = Math.max(0, pAdderTotal - pSolarAA - pBattAA);
   } else { pOverflow = pAdderTotal; }
 
-  const pFinalSolar = pSolarCost + pSolarAA;
-  const pFinalBatt = pBattCost + pBattAA;
-  const pFinalSolarPer = pSolarKw > 0 ? pFinalSolar / (pSolarKw * 1000) : 0;
-  const pFinalBattPer = pBattKwh > 0 ? pFinalBatt / pBattKwh : 0;
-  const pProject = pFinalSolar + pFinalBatt;
-  const pAF = 0.6588 * pProject - 18 * pBattKwh - 1296;
-  const pTotalDisc = pProject - pAF;
-  const pNet = pAF - pRebate;
+  const pFinalSolar    = pSolarCost + pSolarAA;
+  const pFinalBatt     = pBattCost  + pBattAA;
+  const pEligible      = pFinalSolar + pFinalBatt; // amount fitting under caps
+  const pFinalSolarPerW   = pSolarKw  > 0 ? pFinalSolar / (pSolarKw * 1000) : 0;
+  const pFinalBattPerKwh  = pBattKwh  > 0 ? pFinalBatt  / pBattKwh          : 0;
 
-  // Propel warnings
-  let pWarn = '';
-  if (pSolarKw > 0 && pFinalSolarPer > pCapSolar)
-    pWarn += '<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>Solar</strong> $' + pFinalSolarPer.toFixed(2) + '/W exceeds cap of $' + pCapSolar.toFixed(2) + '/W</span></div>';
-  if (pBattKwh > 0 && pFinalBattPer > pCapBatt)
-    pWarn += '<div class="cap-warn"><span style="font-size:18px">⚠</span><span><strong>Battery</strong> $' + pFinalBattPer.toFixed(0) + '/kWh exceeds cap of $' + pCapBatt.toLocaleString() + '/kWh</span></div>';
-  document.getElementById('propel-warnings').innerHTML = pWarn;
+  const pAF        = 0.6588 * pEligible - 18 * pBattKwh - 1296;
+  const pTotalDisc = pEligible - Math.max(0, pAF);
+  const pNetCost   = pEligible - pTotalDisc - pRebate + pOverflow;
 
-  // Propel results
-  let pR = '';
-  pR += line('Solar Cost (with adders)', pFinalSolar);
-  pR += line('  ↳ Effective $/W', pSolarKw > 0 ? '$' + pFinalSolarPer.toFixed(2) + '/W' : '—', 'dim');
-  pR += line('Battery Cost (with adders)', pFinalBatt);
-  pR += line('  ↳ Effective $/kWh', pBattKwh > 0 ? '$' + pFinalBattPer.toFixed(0) + '/kWh' : '—', 'dim');
-  if (pOverflow > 0) pR += line('⚠ Adder overflow (unfunded)', pOverflow, 'neg');
-  pR += '<div style="height:10px"></div>';
-  pR += line('Project Cost (to Propel)', pProject);
-  pR += line('Total Discount', pTotalDisc, 'neg');
-  pR += line('Amount Financed', Math.max(0, pAF));
-  if (pRebate > 0) pR += line('Rebates', pRebate, 'neg');
-  pR += line('Net System Price', pNet, 'large propel');
-  document.getElementById('propel-results').innerHTML = pR;
+  // Headroom = total cap space minus total project cost (only when project < caps)
+  const pTotalCap  = pMaxSolar + pMaxBatt;
+  const pHeadroom  = Math.max(0, pTotalCap - pTotalProjectCost);
 
-  // ═══ COMPARISON ═══
-  const showComp = hProject > 0 || pProject > 0;
-  document.getElementById('comparison').style.display = showComp ? 'block' : 'none';
-  if (!showComp) return;
+  // Cap warnings
+  let pCapWarnings = '';
+  if (pSolarKw > 0 && pFinalSolarPerW > pCapSolar)
+    pCapWarnings += '<div style="color:#c0392b;font-size:13px;margin-top:6px">⚠ Solar $' + pFinalSolarPerW.toFixed(2) + '/W exceeds cap of $' + pCapSolar.toFixed(2) + '/W</div>';
+  if (pBattKwh > 0 && pFinalBattPerKwh > pCapBatt)
+    pCapWarnings += '<div style="color:#c0392b;font-size:13px;margin-top:4px">⚠ Battery $' + pFinalBattPerKwh.toFixed(0) + '/kWh exceeds cap of $' + pCapBatt.toLocaleString() + '/kWh</div>';
 
-  const hDiscPct = hProject > 0 ? (hTotalDisc / hProject * 100).toFixed(1) + '%' : '—';
-  const pDiscPct = pProject > 0 ? (pTotalDisc / pProject * 100).toFixed(1) + '%' : '—';
+  // Build results HTML
+  let pHTML = '';
+
+  // Section 1: Project Summary
+  let p1 = '';
+  p1 += mkLine('Total Project Cost Before Discount', fmt(pTotalProjectCost), '', '');
+  p1 += mkLine('Amount Eligible for Propel', fmt(pEligible), '', 'propel-color');
+  if (pOverflow > 0) {
+    p1 += mkLine('⚠ Overflow — Cannot Be Financed', fmt(pOverflow), '', 'warn');
+  } else {
+    p1 += mkLine('Overflow', '$0', 'dim', 'dim');
+  }
+  if (pHeadroom > 0) {
+    p1 += mkLine('Headroom Remaining', fmt(pHeadroom), '', 'propel-color');
+  } else {
+    p1 += mkLine('Headroom Remaining', '$0', 'dim', 'dim');
+  }
+  if (pCapWarnings) p1 += pCapWarnings;
+  pHTML += mkSection('Project Summary', 'propel', p1);
+
+  // Section 2: Discounts & Rebates
+  let pSolarDisc = pFinalSolar * (pTotalDisc / pEligible); // proportional breakdown
+  let pBattDisc  = pFinalBatt  * (pTotalDisc / pEligible);
+  // recalc properly: total disc = eligible - AF; split proportionally
+  // Actually for display, show breakdown as solar portion and battery portion
+  const pDiscRate = pEligible > 0 ? pTotalDisc / pEligible : 0;
+  const pSolarDiscDisplay = pFinalSolar * pDiscRate;
+  const pBattDiscDisplay  = pFinalBatt  * pDiscRate;
+
+  let p2 = '';
+  p2 += mkLine('Total Discount', '−' + fmt(pTotalDisc), '', 'neg');
+  p2 += mkLine('  Solar portion', '−' + fmt(pSolarDiscDisplay), 'dim', 'dim');
+  p2 += mkLine('  Battery portion', '−' + fmt(pBattDiscDisplay), 'dim', 'dim');
+  p2 += mkLine('Rebates', pRebate > 0 ? '−' + fmt(pRebate) : '$0', pRebate === 0 ? 'dim' : '', pRebate === 0 ? 'dim' : 'neg');
+  pHTML += mkSection('Discounts & Rebates', 'propel', p2);
+
+  // Section 3: Project Cost
+  let p3 = '';
+  p3 += mkLine('Amount Eligible for Propel', fmt(pEligible), '', '');
+  p3 += mkLine('Total Discounts & Rebates', '−' + fmt(pTotalDisc + pRebate), '', 'neg');
+  p3 += mkLine('Overflow', pOverflow > 0 ? '+' + fmt(pOverflow) : '$0', pOverflow === 0 ? 'dim' : '', pOverflow === 0 ? 'dim' : 'warn');
+  p3 += mkLine('Net Cost to Customer', fmt(pNetCost), 'bold', 'large propel-color', 'total-line');
+  pHTML += mkSection('Project Cost', 'propel', p3);
+
+  // Section 4: Proposal Inputs
+  let p4 = '';
+  p4 += '<div class="proposal-input-block">' +
+    '<div class="proposal-input-title">New Solar Price</div>' +
+    '<div class="proposal-input-value propel-color">' + fmt(pFinalSolar) + '</div>' +
+    '<div class="proposal-input-sub">' + (pSolarKw > 0 ? '$' + pFinalSolarPerW.toFixed(2) + '/W effective' : '—') + '</div>' +
+    '<span class="proposal-input-hint propel">Enter under Solar Cost in Propel</span>' +
+    '</div>';
+  p4 += '<div class="proposal-input-block">' +
+    '<div class="proposal-input-title">New Battery Price</div>' +
+    '<div class="proposal-input-value propel-color">' + fmt(pFinalBatt) + '</div>' +
+    '<div class="proposal-input-sub">' + (pBattKwh > 0 ? '$' + pFinalBattPerKwh.toFixed(0) + '/kWh effective' : '—') + '</div>' +
+    '<span class="proposal-input-hint propel">Enter under Battery Cost in Propel</span>' +
+    '</div>';
+  // Overflow block
+  p4 += '<div class="proposal-input-block" style="background:#fff8f7;border-color:#f0c0b8">' +
+    '<div class="proposal-input-title" style="color:#c0392b">Overflow</div>' +
+    '<div class="proposal-input-value" style="color:' + (pOverflow > 0 ? '#c0392b' : '#aaaaaf') + '">' + fmt(pOverflow) + '</div>' +
+    '<div class="proposal-input-sub" style="color:' + (pOverflow > 0 ? '#c0392b' : '#aaaaaf') + '">' +
+      (pOverflow > 0 ? '⚠ This amount must be paid in cash or financed another way' : 'No overflow — full project fits within caps') +
+    '</div>' +
+    '</div>';
+  pHTML += mkSection('Proposal Inputs', 'propel', p4);
+
+  document.getElementById('propel-results-outer').innerHTML = pHTML;
+
+  /* ═══ COMPARISON ═══ */
+  // Always show comparison, show placeholder if no data
+  const hHasData = hTotalProjectCost > 0;
+  const pHasData = pTotalProjectCost > 0;
+
+  // Discount % of eligible
+  const hDiscPct = hEligible > 0 ? (hTotalDisc / hEligible * 100).toFixed(1) + '%' : '—';
+  const pDiscPct = pEligible > 0 ? (pTotalDisc / pEligible * 100).toFixed(1) + '%' : '—';
+
+  const dash = '<span style="color:#ccccd0">—</span>';
+  function cv(val, hasData, cls) {
+    if (!hasData) return dash;
+    return '<span' + (cls ? ' style="' + cls + '"' : '') + '>' + fmt(val) + '</span>';
+  }
+  function cvStr(val, hasData, cls) {
+    if (!hasData) return dash;
+    return '<span' + (cls ? ' style="' + cls + '"' : '') + '>' + val + '</span>';
+  }
 
   const rows = [
-    ['Project Cost', hProject, pProject, false],
-    ['Total Discount', hTotalDisc, pTotalDisc, false],
-    ['Discount %', hDiscPct, pDiscPct, false],
-    ['After Discount', hAfterDisc, Math.max(0, pAF), false],
-    ['Rebates', hRebate, pRebate, false],
-    ['Net Price', hNet, pNet, true],
+    {
+      label: 'Total Project Cost',
+      hVal: cv(hTotalProjectCost, hHasData),
+      pVal: cv(pTotalProjectCost, pHasData),
+      cls: ''
+    },
+    {
+      label: 'Amount Eligible',
+      hVal: hHasData ? '<span style="color:#1a7a42;font-weight:600">' + fmt(hEligible) + '</span>' : dash,
+      pVal: pHasData ? '<span style="color:#1a5ab8;font-weight:600">' + fmt(pEligible) + '</span>' : dash,
+      cls: ''
+    },
+    {
+      label: 'Total Discount',
+      hVal: hHasData ? '<span style="color:#c0392b">−' + fmt(hTotalDisc) + '</span>' : dash,
+      pVal: pHasData ? '<span style="color:#c0392b">−' + fmt(pTotalDisc) + '</span>' : dash,
+      cls: 'neg'
+    },
+    {
+      label: 'Discount % of Eligible',
+      hVal: cvStr(hDiscPct, hHasData),
+      pVal: cvStr(pDiscPct, pHasData),
+      cls: ''
+    },
+    {
+      label: 'Rebates',
+      hVal: hHasData ? (hRebate > 0 ? '<span style="color:#c0392b">−' + fmt(hRebate) + '</span>' : '<span style="color:#aaaaaf">$0</span>') : dash,
+      pVal: pHasData ? (pRebate > 0 ? '<span style="color:#c0392b">−' + fmt(pRebate) + '</span>' : '<span style="color:#aaaaaf">$0</span>') : dash,
+      cls: ''
+    },
+    {
+      label: 'Overflow',
+      hVal: hHasData ? (hOverflow > 0 ? '<span style="color:#c0392b">+' + fmt(hOverflow) + '</span>' : '<span style="color:#aaaaaf">$0</span>') : dash,
+      pVal: pHasData ? (pOverflow > 0 ? '<span style="color:#c0392b">+' + fmt(pOverflow) + '</span>' : '<span style="color:#aaaaaf">$0</span>') : dash,
+      cls: ''
+    },
+    {
+      label: 'Net Price',
+      hVal: hHasData ? '<span style="color:#1a7a42;font-weight:700;font-size:20px">' + fmt(hNetCost) + '</span>' : dash,
+      pVal: pHasData ? '<span style="color:#1a5ab8;font-weight:700;font-size:20px">' + fmt(pNetCost) + '</span>' : dash,
+      isLast: true
+    },
   ];
 
-  let grid = '';
-  rows.forEach(function(r) {
-    const isLast = r[3];
-    const cls = isLast ? 'last bold' : '';
-    const hStyle = isLast ? 'color:#1a7a42' : '';
-    const pStyle = isLast ? 'color:#1a5ab8' : '';
-    const hVal = typeof r[1] === 'string' ? r[1] : fmt(r[1]);
-    const pVal = typeof r[2] === 'string' ? r[2] : fmt(r[2]);
-    grid += '<div class="comp-cell right ' + cls + '" style="' + hStyle + '">' + hVal + '</div>';
-    grid += '<div class="comp-cell center ' + cls + '">' + r[0] + '</div>';
-    grid += '<div class="comp-cell left ' + cls + '" style="' + pStyle + '">' + pVal + '</div>';
+  // Rebuild grid (preserve header)
+  let grid = '<div class="comp-header-cell hdm">HDM Capital</div>' +
+             '<div class="comp-header-cell center"></div>' +
+             '<div class="comp-header-cell propel">Concert Propel</div>';
+
+  rows.forEach(function(r, i) {
+    const isLast = r.isLast;
+    const baseCls = isLast ? 'last bold' : '';
+    grid += '<div class="comp-cell right ' + baseCls + '">' + r.hVal + '</div>';
+    grid += '<div class="comp-cell center ' + baseCls + '">' + r.label + '</div>';
+    grid += '<div class="comp-cell left '  + baseCls + '">' + r.pVal + '</div>';
   });
   document.getElementById('comp-grid').innerHTML = grid;
 
-  // Delta
-  const diff = hNet - pNet;
+  // Delta bar
   const deltaBar = document.getElementById('delta-bar');
-  if (hNet !== 0 && pNet !== 0) {
-    deltaBar.style.display = 'flex';
-    const diffColor = diff > 0 ? '#1a5ab8' : diff < 0 ? '#1a7a42' : '#8e8e99';
-    const badgeBg = diff > 0 ? '#e8f0fc' : diff < 0 ? '#e8f5ee' : '#f7f7f8';
-    const badgeBorder = diff > 0 ? '#b0c8e8' : diff < 0 ? '#b8dcc8' : '#dddde0';
-    const badgeText = diff > 0 ? 'Propel lower' : diff < 0 ? 'HDM lower' : 'Equal';
+  if (hHasData && pHasData) {
+    const diff = hNetCost - pNetCost;
+    const diffColor  = diff > 0 ? '#1a5ab8' : diff < 0 ? '#1a7a42' : '#8e8e99';
+    const badgeBg    = diff > 0 ? '#e8f0fc' : diff < 0 ? '#e8f5ee' : '#f7f7f8';
+    const badgeBorder= diff > 0 ? '#b0c8e8' : diff < 0 ? '#b8dcc8' : '#dddde0';
+    const badgeText  = diff > 0 ? 'Propel is lower' : diff < 0 ? 'HDM is lower' : 'Equal net price';
+    const savingsDesc = diff !== 0 ? ('Propel saves ' + fmt(diff)) : 'Equal net price';
     deltaBar.innerHTML =
-      '<span class="delta-label">Difference:</span>' +
+      '<span class="delta-label">Net Price Difference:</span>' +
       '<span class="delta-amount" style="color:' + diffColor + '">' + fmt(diff) + '</span>' +
       '<span class="delta-badge" style="background:' + badgeBg + ';color:' + diffColor + ';border:1px solid ' + badgeBorder + '">' + badgeText + '</span>';
   } else {
-    deltaBar.style.display = 'none';
+    deltaBar.innerHTML = '<span class="delta-label" style="color:#8e8e99">Enter data in both panels to compare</span>';
   }
 }
 
 function clearAll() {
-  document.querySelectorAll('.input-field').forEach(function(el) { el.value = ''; el.classList.remove('derived-text'); });
-  document.querySelectorAll('.input-wrap').forEach(function(el) { el.classList.remove('derived'); });
+  document.querySelectorAll('.input-field').forEach(function(el) {
+    el.value = ''; el.classList.remove('derived-text');
+  });
+  document.querySelectorAll('.input-wrap').forEach(function(el) {
+    el.classList.remove('derived');
+  });
   document.getElementById('propel-cap-solar').value = '4.85';
-  document.getElementById('propel-cap-batt').value = '2000';
+  document.getElementById('propel-cap-batt').value  = '2000';
   adders = { hdm: [], propel: [] };
-  hdmLastEdited = [];
+  hdmLastEdited    = [];
   propelLastEdited = [];
   renderAdders('hdm');
   renderAdders('propel');
   calc();
 }
 
-/* ── Download as PDF ── */
+/* ── Download PDF ── */
 async function downloadResults() {
   const btn = document.querySelector('.btn-download');
   const origText = btn.textContent;
   btn.textContent = '⏳ Generating PDF…';
   btn.disabled = true;
 
+  // Temporarily expand collapsed panels for PDF
+  const hdmCollapsed    = document.getElementById('hdm-panel').classList.contains('collapsed');
+  const propelCollapsed = document.getElementById('propel-panel').classList.contains('collapsed');
+  if (hdmCollapsed)    document.getElementById('hdm-panel').classList.remove('collapsed');
+  if (propelCollapsed) document.getElementById('propel-panel').classList.remove('collapsed');
+
   try {
-    // Check libraries loaded
     if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
-      // Fallback to browser print
       window.print();
-      btn.textContent = origText;
-      btn.disabled = false;
+      btn.textContent = origText; btn.disabled = false;
       return;
     }
-    // Hide buttons for the capture
-    const topBar = document.querySelector('.top-bar');
-    const addBtns = document.querySelectorAll('.btn-add');
+    const topBar     = document.querySelector('.top-bar');
+    const addBtns    = document.querySelectorAll('.btn-add');
     const removeBtns = document.querySelectorAll('.btn-remove');
     topBar.style.display = 'none';
-    addBtns.forEach(function(b) { b.style.display = 'none'; });
+    addBtns.forEach(function(b)    { b.style.display = 'none'; });
     removeBtns.forEach(function(b) { b.style.display = 'none'; });
 
-    // Capture the full page
     const canvas = await html2canvas(document.body, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#f0f0f2',
-      width: document.body.scrollWidth,
-      height: document.body.scrollHeight,
-      windowWidth: document.body.scrollWidth,
-      windowHeight: document.body.scrollHeight,
+      scale: 2, useCORS: true, backgroundColor: '#f0f0f2',
+      width: document.body.scrollWidth, height: document.body.scrollHeight,
+      windowWidth: document.body.scrollWidth, windowHeight: document.body.scrollHeight,
     });
 
-    // Restore buttons
     topBar.style.display = '';
-    addBtns.forEach(function(b) { b.style.display = ''; });
+    addBtns.forEach(function(b)    { b.style.display = ''; });
     removeBtns.forEach(function(b) { b.style.display = ''; });
 
-    // Build PDF — fit captured image to pages
     const imgData = canvas.toDataURL('image/png');
-    const imgW = canvas.width;
-    const imgH = canvas.height;
-
-    // Use landscape if content is wide, else portrait
-    const pageW = 215.9; // letter width mm
-    const pageH = 279.4; // letter height mm
-    const margin = 10;
-    const usableW = pageW - margin * 2;
-    const usableH = pageH - margin * 2;
-
+    const imgW = canvas.width, imgH = canvas.height;
+    const pageW = 215.9, pageH = 279.4, margin = 10;
+    const usableW = pageW - margin * 2, usableH = pageH - margin * 2;
     const ratio = imgW / imgH;
-    const pdfImgW = usableW;
-    const pdfImgH = usableW / ratio;
-
+    const pdfImgW = usableW, pdfImgH = usableW / ratio;
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: pdfImgH > usableH ? 'portrait' : 'portrait',
-      unit: 'mm',
-      format: 'letter',
-    });
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
 
-    // If the image is taller than one page, split across pages
     if (pdfImgH <= usableH) {
       pdf.addImage(imgData, 'PNG', margin, margin, pdfImgW, pdfImgH);
     } else {
-      // Scale: how many px per mm
       const pxPerMm = imgW / pdfImgW;
       const sliceHeightPx = usableH * pxPerMm;
-      let yOffset = 0;
-      let page = 0;
-
+      let yOffset = 0, page = 0;
       while (yOffset < imgH) {
         if (page > 0) pdf.addPage();
-
-        // Create a slice canvas
         const sliceH = Math.min(sliceHeightPx, imgH - yOffset);
         const sliceCanvas = document.createElement('canvas');
-        sliceCanvas.width = imgW;
-        sliceCanvas.height = sliceH;
+        sliceCanvas.width = imgW; sliceCanvas.height = sliceH;
         const ctx = sliceCanvas.getContext('2d');
         ctx.drawImage(canvas, 0, yOffset, imgW, sliceH, 0, 0, imgW, sliceH);
-
         const sliceData = sliceCanvas.toDataURL('image/png');
         const sliceMmH = sliceH / pxPerMm;
         pdf.addImage(sliceData, 'PNG', margin, margin, pdfImgW, sliceMmH);
-
-        yOffset += sliceH;
-        page++;
+        yOffset += sliceH; page++;
       }
     }
 
-    // Add footer with timestamp
     const now = new Date();
     const stamp = 'Generated ' + now.toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) +
       ' at ' + now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
     const pageCount = pdf.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
-      pdf.setPage(i);
-      pdf.setFontSize(8);
-      pdf.setTextColor(150);
+      pdf.setPage(i); pdf.setFontSize(8); pdf.setTextColor(150);
       pdf.text(stamp, pageW / 2, pageH - 5, { align: 'center' });
     }
-
     pdf.save('TPO_Comparison_' + now.toISOString().slice(0, 10) + '.pdf');
   } catch (err) {
     console.error('PDF generation failed:', err);
-    alert('PDF generation failed. Try using Print → Save as PDF instead.');
+    alert('PDF generation failed. Try Print → Save as PDF instead.');
   }
 
-  btn.textContent = origText;
-  btn.disabled = false;
+  // Restore collapsed state
+  if (hdmCollapsed)    document.getElementById('hdm-panel').classList.add('collapsed');
+  if (propelCollapsed) document.getElementById('propel-panel').classList.add('collapsed');
+
+  btn.textContent = origText; btn.disabled = false;
 }
 
 // Init
